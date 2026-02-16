@@ -1,0 +1,150 @@
+% ============================================================
+% Template LaTeX — Embaixada da República de Angola na Alemanha
+% Ecossistema Digital — Documentação Técnica
+% ============================================================
+\documentclass[a4paper,11pt]{article}
+
+% --- Pacotes ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{parskip}
+
+% --- Cores institucionais (bandeira de Angola) ---
+\definecolor{angola-red}{HTML}{CE1126}
+\definecolor{angola-black}{HTML}{000000}
+\definecolor{angola-gold}{HTML}{F9D616}
+
+% --- Geometria da página ---
+\geometry{
+    top=30mm,
+    bottom=25mm,
+    left=25mm,
+    right=25mm,
+    headheight=15mm
+}
+
+% --- Cabeçalho e rodapé ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{angola-red}{Embaixada da República de Angola na Alemanha}}
+\fancyhead[R]{\small\textcolor{gray}{\leftmark}}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\small\textcolor{gray}{Ecossistema Digital}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% --- Estilo de títulos ---
+\titleformat{\section}
+    {\Large\bfseries\color{angola-red}}{\thesection}{1em}{}
+\titleformat{\subsection}
+    {\large\bfseries\color{angola-black}}{\thesubsection}{1em}{}
+
+% --- Hyperlinks ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=angola-red,
+    urlcolor=angola-red,
+    citecolor=angola-red
+}
+
+% --- Listagens de código ---
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray},
+    backgroundcolor=\color{gray!5},
+    keywordstyle=\color{angola-red},
+    commentstyle=\color{gray},
+    stringstyle=\color{angola-gold!80!black}
+}
+
+% ============================================================
+% METADADOS DO DOCUMENTO (editar para cada documento)
+% ============================================================
+\newcommand{\doctitulo}{Título do Documento}
+\newcommand{\docautor}{Nome do Autor}
+\newcommand{\docversao}{1.0}
+\newcommand{\docdata}{\today}
+\newcommand{\docdepartamento}{Secção Consular}
+
+% ============================================================
+\begin{document}
+
+% --- Página de rosto ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\color{angola-red}\rule{\textwidth}{2pt}}
+
+    \vspace{1.5cm}
+
+    {\Huge\bfseries\color{angola-red} \doctitulo \par}
+
+    \vspace{1cm}
+
+    {\Large Embaixada da República de Angola \par}
+    {\large Berlim, Alemanha \par}
+
+    \vspace{2cm}
+
+    \begin{tabular}{ll}
+        \textbf{Autor:}        & \docautor \\
+        \textbf{Departamento:} & \docdepartamento \\
+        \textbf{Versão:}       & \docversao \\
+        \textbf{Data:}         & \docdata \\
+    \end{tabular}
+
+    \vfill
+
+    {\color{angola-red}\rule{\textwidth}{2pt}}
+
+    \vspace{0.5cm}
+    {\small\textcolor{gray}{Ecossistema Digital — Documento gerado automaticamente}}
+\end{titlepage}
+
+% --- Índice ---
+\tableofcontents
+\newpage
+
+% ============================================================
+% CONTEÚDO (editar a partir daqui)
+% ============================================================
+
+\section{Introdução}
+
+Este documento faz parte da documentação técnica do Ecossistema Digital da Embaixada da República de Angola na Alemanha.
+
+\subsection{Objectivo}
+
+Descrever o objectivo deste documento.
+
+\subsection{Âmbito}
+
+Definir o âmbito e os destinatários.
+
+\section{Conteúdo Principal}
+
+Corpo do documento.
+
+\subsection{Subsecção}
+
+Texto da subsecção.
+
+\section{Conclusão}
+
+Conclusões e próximos passos.
+
+% ============================================================
+\end{document}
