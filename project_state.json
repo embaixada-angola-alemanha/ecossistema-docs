@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 174,
+    "horas_consumidas": 186,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 14,
-    "progresso_pct": 19.4,
+    "tarefas_concluidas": 15,
+    "progresso_pct": 20.8,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -95,8 +95,8 @@
       "data_inicio": "2026-02-17",
       "data_fim": "2026-03-30",
       "horas_planeadas": 40,
-      "horas_consumidas": 14,
-      "progresso_pct": 33
+      "horas_consumidas": 26,
+      "progresso_pct": 67
     },
     {
       "id": 5,
@@ -785,13 +785,13 @@
       "nome": "Civil Registry Module",
       "sprint": 4,
       "horas_planeadas": 12,
-      "horas_consumidas": 0,
+      "horas_consumidas": 12,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
       "artefactos": [],
       "bloqueios": [],
       "notas": "",
@@ -2142,6 +2142,11 @@
       "data": "2026-02-17T19:00:00Z",
       "evento": "TAREFA_CONCLUIDA",
       "detalhe": "T4.1 Document Management + MinIO concluída. commons-storage module (MinIO 8.5.7), file upload/download, versioning, MIME validation, 4 new endpoints, MinIO Testcontainer. 167 tests. Commits: 4dea74b (commons), fb610b0 (sgc)."
+    },
+    {
+      "data": "2026-02-17T20:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T4.2 Civil Registry Module concluída. Birth/marriage/death registration, state machine workflow (7 states), OpenPDF certificate generation, MinIO storage, 10 REST endpoints, 16 new files. 201 tests. Commit: f093611."
     }
   ]
 }
