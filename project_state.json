@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 226,
+    "horas_consumidas": 236,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 18,
-    "progresso_pct": 25.0,
+    "tarefas_concluidas": 19,
+    "progresso_pct": 26.4,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -106,8 +106,8 @@
       "data_inicio": "2026-02-17",
       "data_fim": "2026-04-13",
       "horas_planeadas": 40,
-      "horas_consumidas": 26,
-      "progresso_pct": 50
+      "horas_consumidas": 36,
+      "progresso_pct": 75
     },
     {
       "id": 6,
@@ -891,22 +891,30 @@
       "nome": "Audit + Reporting Module",
       "sprint": 5,
       "horas_planeadas": 10,
-      "horas_consumidas": 0,
+      "horas_consumidas": 10,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "V8__create_audit_events_table.sql",
+        "AuditEventEntity.java",
+        "JpaAuditService.java",
+        "RelatorioService.java",
+        "CsvExportService.java",
+        "RelatorioPdfService.java",
+        "RelatorioController.java"
+      ],
       "bloqueios": [],
-      "notas": "",
-      "descricao": "Audit trail completo com Hibernate Envers ou custom. Relatórios: vistos processados, cidadãos registados, receitas. Export CSV/PDF.",
+      "notas": "JpaAuditService overrides Slf4jAuditService via @ConditionalOnMissingBean. 20 @Auditable annotations on 5 services. Semicolon CSV with UTF-8 BOM. OpenPDF reports with embassy branding.",
+      "descricao": "Audit trail completo com JpaAuditService (custom, overrides Slf4j default). Dashboard métricas, estatísticas por módulo. Export CSV (semicolon, UTF-8 BOM) e PDF (OpenPDF). Filtros por período/tipo/estado.",
       "criterios": [
         "Audit trail em todas as entidades",
         "Dashboard de métricas API",
         "Export CSV",
-        "Export PDF (JasperReports)",
+        "Export PDF (OpenPDF)",
         "Filtros por período/tipo"
       ]
     },
@@ -2177,6 +2185,11 @@
       "data": "2026-02-17T22:00:00Z",
       "evento": "TAREFA_CONCLUIDA",
       "detalhe": "T5.2 Notification Service concluída. Event-driven pipeline: WorkflowTransitionEvent → WorkflowNotificationListener → RabbitMQ → NotificationConsumer → email + log. 19 email templates, notification preferences (opt-out), notification log, NotificacaoController REST API, Flyway V7 migration. Refactored AgendamentoService to event-driven. 30 files changed (+1272/-44) in sgc-backend, 19 templates in commons, RabbitMQ in infra. 314 tests. Commits: bb1f994, 0c573f7, 9886506."
+    },
+    {
+      "data": "2026-02-17T22:45:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T5.3 Audit + Reporting Module concluída. JpaAuditService overrides Slf4jAuditService (via @ConditionalOnMissingBean), 20 @Auditable annotations on 5 services, Flyway V8 audit_events table, RelatorioService (dashboard/statistics), CsvExportService (semicolon, UTF-8 BOM), RelatorioPdfService (OpenPDF, embassy branding), RelatorioController at /api/v1/relatorios. 28 files changed (+1687). 343 tests. Commit: 70367ae."
     }
   ]
 }
