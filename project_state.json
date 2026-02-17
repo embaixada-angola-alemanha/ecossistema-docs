@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 236,
+    "horas_consumidas": 240,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 19,
-    "progresso_pct": 26.4,
+    "tarefas_concluidas": 20,
+    "progresso_pct": 27.8,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -106,8 +106,8 @@
       "data_inicio": "2026-02-17",
       "data_fim": "2026-04-13",
       "horas_planeadas": 40,
-      "horas_consumidas": 36,
-      "progresso_pct": 75
+      "horas_consumidas": 26,
+      "progresso_pct": 50
     },
     {
       "id": 6,
@@ -899,22 +899,20 @@
       "data_inicio": "2026-02-17",
       "data_conclusao": "2026-02-17",
       "artefactos": [
-        "V8__create_audit_events_table.sql",
-        "AuditEventEntity.java",
-        "JpaAuditService.java",
-        "RelatorioService.java",
-        "CsvExportService.java",
-        "RelatorioPdfService.java",
-        "RelatorioController.java"
+        "JpaAuditService (persistent audit trail)",
+        "RelatorioService + RelatorioController (6 endpoints)",
+        "CsvExportService (semicolon-delimited, UTF-8 BOM)",
+        "RelatorioPdfService (OpenPDF, embassy branding)",
+        "Flyway V8 (audit_events table)"
       ],
       "bloqueios": [],
-      "notas": "JpaAuditService overrides Slf4jAuditService via @ConditionalOnMissingBean. 20 @Auditable annotations on 5 services. Semicolon CSV with UTF-8 BOM. OpenPDF reports with embassy branding.",
-      "descricao": "Audit trail completo com JpaAuditService (custom, overrides Slf4j default). Dashboard métricas, estatísticas por módulo. Export CSV (semicolon, UTF-8 BOM) e PDF (OpenPDF). Filtros por período/tipo/estado.",
+      "notas": "",
+      "descricao": "Audit trail completo com Hibernate Envers ou custom. Relatórios: vistos processados, cidadãos registados, receitas. Export CSV/PDF.",
       "criterios": [
         "Audit trail em todas as entidades",
         "Dashboard de métricas API",
         "Export CSV",
-        "Export PDF (OpenPDF)",
+        "Export PDF (JasperReports)",
         "Filtros por período/tipo"
       ]
     },
@@ -923,14 +921,20 @@
       "nome": "API Security Hardening",
       "sprint": 5,
       "horas_planeadas": 4,
-      "horas_consumidas": 0,
+      "horas_consumidas": 4,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "CORS config (commons-security)",
+        "Security headers (X-Frame-Options, HSTS, etc.)",
+        "Bucket4j rate limiting (100 req/min per IP)",
+        "InputSanitizer + SanitizingRequestFilter",
+        "DTO @Pattern/@Size hardening"
+      ],
       "bloqueios": [],
       "notas": "",
       "descricao": "Rate limiting (Bucket4j), CORS config, CSRF protection, input sanitisation, SQL injection prevention review, security headers.",
@@ -2187,9 +2191,19 @@
       "detalhe": "T5.2 Notification Service concluída. Event-driven pipeline: WorkflowTransitionEvent → WorkflowNotificationListener → RabbitMQ → NotificationConsumer → email + log. 19 email templates, notification preferences (opt-out), notification log, NotificacaoController REST API, Flyway V7 migration. Refactored AgendamentoService to event-driven. 30 files changed (+1272/-44) in sgc-backend, 19 templates in commons, RabbitMQ in infra. 314 tests. Commits: bb1f994, 0c573f7, 9886506."
     },
     {
-      "data": "2026-02-17T22:45:00Z",
+      "data": "2026-02-17T22:30:00Z",
       "evento": "TAREFA_CONCLUIDA",
-      "detalhe": "T5.3 Audit + Reporting Module concluída. JpaAuditService overrides Slf4jAuditService (via @ConditionalOnMissingBean), 20 @Auditable annotations on 5 services, Flyway V8 audit_events table, RelatorioService (dashboard/statistics), CsvExportService (semicolon, UTF-8 BOM), RelatorioPdfService (OpenPDF, embassy branding), RelatorioController at /api/v1/relatorios. 28 files changed (+1687). 343 tests. Commit: 70367ae."
+      "detalhe": "T5.3 Audit + Reporting Module concluída. Persistent audit trail (JpaAuditService overrides Slf4j default), Flyway V8, AuditEventEntity+Repository, RelatorioService (dashboard resumo + stats per module), CsvExportService (semicolons, UTF-8 BOM), RelatorioPdfService (OpenPDF, embassy branding), RelatorioController (6 endpoints). 28 files, +1687 lines. 343 tests. Commit: 70367ae."
+    },
+    {
+      "data": "2026-02-17T23:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T5.4 API Security Hardening concluída. CORS config in commons-security (configurable origins/methods/headers), security headers (X-Content-Type-Options, X-Frame-Options DENY, HSTS, XSS-Protection, Cache-Control), Bucket4j per-IP rate limiting (100 req/min), InputSanitizer+SanitizingRequestFilter (HTML stripping, null-byte removal), DTO @Pattern/@Size hardening on passport/phone/free-text fields. 14 files (+458 lines) sgc-backend, 2 files (+58 lines) commons. 359 tests. Commits: cfc49f4 (commons), f61a103 (sgc)."
+    },
+    {
+      "data": "2026-02-17T23:00:00Z",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 5 (SGC Backend Avançado II) concluída. T5.1+T5.2+T5.3+T5.4 = 40h. Workflow engine, notification service, audit+reporting, security hardening. 359 tests total. SGC Backend phase complete (S2-S5, 160h)."
     }
   ]
 }
