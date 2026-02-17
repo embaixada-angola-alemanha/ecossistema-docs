@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 256,
+    "horas_consumidas": 266,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 21,
-    "progresso_pct": 29.2,
+    "tarefas_concluidas": 22,
+    "progresso_pct": 30.6,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -1030,14 +1030,21 @@
       "nome": "SGC \"Diplomacia Clássica\" Theme",
       "sprint": 6,
       "horas_planeadas": 10,
-      "horas_consumidas": 0,
+      "horas_consumidas": 10,
       "fase": "SGC-FE",
       "repo": "ecossistema-sgc-frontend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "Dark theme CSS variables (--bg:#0c0f14, --gold:#c9a84c, etc.)",
+        "Playfair Display + DM Sans fonts",
+        "Embassy branding sidebar (EA emblem, sectioned navigation)",
+        "Gold avatar with user initials",
+        "Material dark overrides (cards, menus, toolbar, spinner)",
+        "Custom scrollbar styling"
+      ],
       "bloqueios": [],
       "notas": "Design system from ecossistema-prototypes.html (lines 54-191).",
       "descricao": "Aplicar design system 'Diplomacia Clássica' ao SGC frontend conforme protótipo. Tema dark+gold para funcionários consulares.",
@@ -2216,6 +2223,11 @@
       "data": "2026-02-17T23:30:00Z",
       "evento": "TAREFA_CONCLUIDA",
       "detalhe": "T6.1 Angular Scaffold + Auth UI concluída. Angular 21 + Material 21 + keycloak-angular 21. Standalone components, functional guards (auth+role) and HTTP interceptor, Material sidenav shell with role-based navigation (8 modules), 9 lazy-loaded feature routes with stubs, i18n (pt/de/en/cs), ApiResponse/PagedData models, AuthService, shared components (LoadingSpinner, StatusBadge). 56 files, +9847 lines. Port 3001, proxy to backend :8081. Production build 508KB. Commit: dba949d."
+    },
+    {
+      "data": "2026-02-17",
+      "evento": "T6.4 CONCLUIDA — SGC 'Diplomacia Clássica' dark+gold theme applied from prototype",
+      "detalhes": "Dark theme (#0c0f14), gold accents (#c9a84c), Playfair Display + DM Sans fonts, embassy EA emblem, sectioned sidebar, Material dark overrides. 5 files, +399/-77 lines."
     }
   ]
 }
