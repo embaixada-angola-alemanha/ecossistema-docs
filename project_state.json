@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 274,
+    "horas_consumidas": 278,
     "total_sprints": 20,
-    "total_tarefas": 72,
-    "tarefas_concluidas": 23,
-    "progresso_pct": 31.9,
+    "total_tarefas": 73,
+    "tarefas_concluidas": 24,
+    "progresso_pct": 32.9,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -539,6 +539,33 @@
         "Kanban board (4 colunas) com cards estilizados",
         "Team panel com avatares e online indicators",
         "KPI cards com border-left teal accent"
+      ]
+    },
+    {
+      "id": "T1.5",
+      "nome": "GPJ Dashboard Live Auto-Refresh",
+      "sprint": 1,
+      "horas_planeadas": 4,
+      "horas_consumidas": 4,
+      "fase": "GPJ",
+      "repo": "ecossistema-gpj-frontend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "dashboard-home.ts: RxJS interval(30s) + forkJoin + takeUntilDestroyed",
+        "dashboard-home.html: live indicator bar (pulsing dot + timestamp)",
+        "dashboard-home.scss: live-bar, live-dot (gpjPulse animation), live-time styles"
+      ],
+      "bloqueios": [],
+      "notas": "30s polling via interval+startWith+forkJoin. Silent refresh (no spinner after first load). Automatic cleanup via takeUntilDestroyed. Commit: d04ae4f.",
+      "descricao": "Dashboard GPJ atualiza dados automaticamente a cada 30 segundos com indicador visual 'Live' e timestamp da última atualização.",
+      "criterios": [
+        "Dashboard refresca métricas, report e sprints a cada 30s",
+        "Indicador 'Live' com dot pulsante e timestamp HH:mm:ss",
+        "Sem spinner nas atualizações subsequentes",
+        "Cleanup automático ao navegar para fora"
       ]
     },
     {
