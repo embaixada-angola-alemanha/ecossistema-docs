@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 240,
+    "horas_consumidas": 256,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 20,
-    "progresso_pct": 27.8,
+    "tarefas_concluidas": 21,
+    "progresso_pct": 29.2,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -951,14 +951,21 @@
       "nome": "Angular Scaffold + Auth UI",
       "sprint": 6,
       "horas_planeadas": 16,
-      "horas_consumidas": 0,
+      "horas_consumidas": 16,
       "fase": "SGC-FE",
       "repo": "ecossistema-sgc-frontend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "Angular 21 + Material 21 + keycloak-angular 21",
+        "Keycloak auth (PKCE S256, functional guards/interceptor)",
+        "Material sidenav shell with role-based navigation",
+        "9 lazy-loaded feature routes (stubs)",
+        "i18n 4 languages (pt/de/en/cs)",
+        "ApiResponse/PagedData models, AuthService, shared components"
+      ],
       "bloqueios": [],
       "notas": "",
       "descricao": "Angular 18 scaffold: routing, lazy loading, Keycloak adapter, auth guards, HTTP interceptor (JWT), role-based UI rendering.",
@@ -2204,6 +2211,11 @@
       "data": "2026-02-17T23:00:00Z",
       "evento": "SPRINT_CONCLUIDA",
       "detalhe": "Sprint 5 (SGC Backend Avançado II) concluída. T5.1+T5.2+T5.3+T5.4 = 40h. Workflow engine, notification service, audit+reporting, security hardening. 359 tests total. SGC Backend phase complete (S2-S5, 160h)."
+    },
+    {
+      "data": "2026-02-17T23:30:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T6.1 Angular Scaffold + Auth UI concluída. Angular 21 + Material 21 + keycloak-angular 21. Standalone components, functional guards (auth+role) and HTTP interceptor, Material sidenav shell with role-based navigation (8 modules), 9 lazy-loaded feature routes with stubs, i18n (pt/de/en/cs), ApiResponse/PagedData models, AuthService, shared components (LoadingSpinner, StatusBadge). 56 files, +9847 lines. Port 3001, proxy to backend :8081. Production build 508KB. Commit: dba949d."
     }
   ]
 }
