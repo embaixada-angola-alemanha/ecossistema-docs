@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 200,
+    "horas_consumidas": 214,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 16,
-    "progresso_pct": 22.2,
+    "tarefas_concluidas": 17,
+    "progresso_pct": 23.6,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -102,12 +102,12 @@
       "id": 5,
       "titulo": "SGC Backend Avançado II",
       "fase": "SGC-BE",
-      "estado": "PENDENTE",
-      "data_inicio": "2026-03-31",
+      "estado": "EM_PROGRESSO",
+      "data_inicio": "2026-02-17",
       "data_fim": "2026-04-13",
       "horas_planeadas": 40,
-      "horas_consumidas": 0,
-      "progresso_pct": 0
+      "horas_consumidas": 14,
+      "progresso_pct": 25
     },
     {
       "id": 6,
@@ -833,13 +833,13 @@
       "nome": "Workflow Engine",
       "sprint": 5,
       "horas_planeadas": 14,
-      "horas_consumidas": 0,
+      "horas_consumidas": 14,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
       "artefactos": [],
       "bloqueios": [],
       "notas": "",
@@ -2157,6 +2157,11 @@
       "data": "2026-02-17T20:30:00Z",
       "evento": "SPRINT_CONCLUIDA",
       "detalhe": "Sprint 4 (SGC Backend Avançado I) concluída. T4.1+T4.2+T4.3 = 40h. Document management, civil registry, notarial services. 236 tests total."
+    },
+    {
+      "data": "2026-02-17T21:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T5.1 Workflow Engine concluída. Generic WorkflowStateMachine<E> base class replacing 5 duplicate state machines, Spring ApplicationEvent infrastructure for state transitions, WorkflowAuditListener for centralized logging. 7 new files, 12 modified. 278 tests. Commit: 1aeb1aa."
     }
   ]
 }
