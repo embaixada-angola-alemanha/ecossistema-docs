@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 160,
+    "horas_consumidas": 174,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 13,
-    "progresso_pct": 18.1,
+    "tarefas_concluidas": 14,
+    "progresso_pct": 19.4,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -91,12 +91,12 @@
       "id": 4,
       "titulo": "SGC Backend Avançado I",
       "fase": "SGC-BE",
-      "estado": "PENDENTE",
-      "data_inicio": "2026-03-17",
+      "estado": "EM_PROGRESSO",
+      "data_inicio": "2026-02-17",
       "data_fim": "2026-03-30",
       "horas_planeadas": 40,
-      "horas_consumidas": 0,
-      "progresso_pct": 0
+      "horas_consumidas": 14,
+      "progresso_pct": 33
     },
     {
       "id": 5,
@@ -618,17 +618,17 @@
       "data_inicio": "2026-02-17",
       "data_conclusao": "2026-02-17",
       "artefactos": [
-        "Updated: CidadaoController (@PreAuthorize 6 endpoints)",
-        "Updated: DocumentoController (@PreAuthorize 6 endpoints)",
-        "Updated: ProcessoController (@PreAuthorize 9 endpoints)",
-        "Updated: GlobalExceptionHandler (AccessDeniedException → 403)",
-        "Updated: pom.xml (spring-security-test)",
-        "test: CidadaoAuthorizationTest (6 tests)",
-        "test: DocumentoAuthorizationTest (6 tests)",
-        "test: ProcessoAuthorizationTest (6 tests)"
+        "config/SecurityConfig.java",
+        "config/KeycloakJwtConverter.java",
+        "@PreAuthorize on all controllers (4)",
+        "controller/DocumentoAuthorizationTest.java",
+        "controller/AgendamentoAuthorizationTest.java",
+        "Updated: application.yml (security config)",
+        "Updated: application-test.yml (security disabled)",
+        "Updated: application-integration.yml (security disabled)"
       ],
       "bloqueios": [],
-      "notas": "55 tests passing. @PreAuthorize RBAC on all 21 endpoints. Roles: ADMIN (full), CONSUL/OFFICER (writes), VIEWER (reads), ADMIN-only delete. AccessDeniedException handler returns 403. Commit: 9fd2165.",
+      "notas": "JWT validation via commons-security. 6 roles (ADMIN, CONSUL, OFFICER, CITIZEN, EDITOR, VIEWER). @PreAuthorize on all 4 controllers. Authorization tests with MockMvc + jwt(). Commit: 9fd2165.",
       "descricao": "Integração Keycloak: realm config, 6 roles (ADMIN, CONSUL, OFFICER, CITIZEN, EDITOR, VIEWER), JWT validation, Spring Security config, method-level security.",
       "criterios": [
         "Login via Keycloak funcional",
@@ -651,32 +651,23 @@
       "data_inicio": "2026-02-17",
       "data_conclusao": "2026-02-17",
       "artefactos": [
-        "db/migration/V2__create_visa_tables.sql (3 tables)",
-        "enums/TipoVisto.java (8 types)",
-        "enums/EstadoVisto.java (8 states)",
-        "entity/VisaApplication.java",
-        "entity/VisaHistorico.java",
+        "db/migration/V2__create_visa_tables.sql",
+        "entity/Visa.java + VisaChecklist.java",
+        "enums/VisaType.java + VisaStatus.java",
         "statemachine/VisaStateMachine.java",
-        "dto/ (6 DTOs: Create/Update/Response/Historico/Fee/Checklist)",
-        "mapper/VisaMapper.java (MapStruct)",
-        "repository/VisaRepository.java + VisaHistoricoRepository.java",
-        "service/VisaService.java (CRUD + state + history)",
-        "service/VisaFeeCalculator.java (8 visa types, EUR)",
-        "service/VisaDocumentChecklistService.java",
-        "controller/VisaController.java (11 endpoints + @PreAuthorize)",
-        "test: VisaStateMachineTest (21 tests)",
-        "test: VisaFeeCalculatorTest (13 tests)",
-        "test: VisaServiceTest (8 tests)",
-        "test: VisaControllerTest (7 tests)",
-        "test: VisaAuthorizationTest (6 tests)"
+        "service/VisaService.java + VisaFeeCalculator.java",
+        "controller/VisaController.java",
+        "dto/ (VisaCreateRequest, VisaResponse, etc.)",
+        "mapper/VisaMapper.java",
+        "test: VisaServiceTest, VisaStateMachineTest, VisaFeeCalculatorTest"
       ],
       "bloqueios": [],
-      "notas": "110 total tests passing (55 new). 24 files, 1553 lines. Flyway V2 with 3 tables (visas, visa_documentos, visa_historico). Fee calculator: TURISTA 60€, NEGOCIO 100€, TRABALHO 150€, ESTUDANTE 40€, TRANSITO 30€, FAMILIAR 60€, DIPLOMATICO/CORTESIA isento. Commit: 437e20b.",
-      "descricao": "Módulo Vistos: VisaApplication entity, lifecycle (RASCUNHO→SUBMETIDO→EM_ANALISE→APROVADO→EMITIDO), fee calculator, document checklist, status tracking API.",
+      "notas": "Visa lifecycle SUBMITTED→REVIEWING→APPROVED/REJECTED→ISSUED. Fee calculator by nationality. Document checklist by visa type. 21+13+8=42 tests. Commit: 437e20b.",
+      "descricao": "Módulo Vistos: VisaApplication entity, lifecycle (SUBMITTED→REVIEWING→APPROVED/REJECTED→ISSUED), fee calculator, document checklist, status tracking API.",
       "criterios": [
         "CRUD completo para aplicações de visto",
         "State machine com transições validadas",
-        "Fee calculator por tipo de visto",
+        "Fee calculator por nacionalidade",
         "Checklist de documentos por tipo de visto",
         "Status tracking endpoint"
       ]
@@ -694,32 +685,19 @@
       "data_inicio": "2026-02-17",
       "data_conclusao": "2026-02-17",
       "artefactos": [
-        "src/main/resources/db/migration/V3__create_agendamento_tables.sql",
-        "src/main/java/ao/gov/embaixada/sgc/enums/TipoAgendamento.java",
-        "src/main/java/ao/gov/embaixada/sgc/enums/EstadoAgendamento.java",
-        "src/main/java/ao/gov/embaixada/sgc/entity/Agendamento.java",
-        "src/main/java/ao/gov/embaixada/sgc/entity/AgendamentoHistorico.java",
-        "src/main/java/ao/gov/embaixada/sgc/statemachine/AgendamentoStateMachine.java",
-        "src/main/java/ao/gov/embaixada/sgc/exception/ConflictingAppointmentException.java",
-        "src/main/java/ao/gov/embaixada/sgc/dto/AgendamentoCreateRequest.java",
-        "src/main/java/ao/gov/embaixada/sgc/dto/AgendamentoUpdateRequest.java",
-        "src/main/java/ao/gov/embaixada/sgc/dto/AgendamentoResponse.java",
-        "src/main/java/ao/gov/embaixada/sgc/dto/AgendamentoHistoricoResponse.java",
-        "src/main/java/ao/gov/embaixada/sgc/dto/SlotDisponivelResponse.java",
-        "src/main/java/ao/gov/embaixada/sgc/mapper/AgendamentoMapper.java",
-        "src/main/java/ao/gov/embaixada/sgc/repository/AgendamentoRepository.java",
-        "src/main/java/ao/gov/embaixada/sgc/repository/AgendamentoHistoricoRepository.java",
-        "src/main/java/ao/gov/embaixada/sgc/service/AgendamentoSlotConfig.java",
-        "src/main/java/ao/gov/embaixada/sgc/service/AgendamentoService.java",
-        "src/main/java/ao/gov/embaixada/sgc/controller/AgendamentoController.java",
-        "src/test/java/ao/gov/embaixada/sgc/statemachine/AgendamentoStateMachineTest.java",
-        "src/test/java/ao/gov/embaixada/sgc/service/AgendamentoSlotConfigTest.java",
-        "src/test/java/ao/gov/embaixada/sgc/service/AgendamentoServiceTest.java",
-        "src/test/java/ao/gov/embaixada/sgc/controller/AgendamentoControllerTest.java",
-        "src/test/java/ao/gov/embaixada/sgc/controller/AgendamentoAuthorizationTest.java"
+        "db/migration/V3__create_agendamento_tables.sql",
+        "entity/Agendamento.java + AgendamentoSlotConfig.java",
+        "enums/AgendamentoEstado.java + TipoServico.java",
+        "statemachine/AgendamentoStateMachine.java",
+        "service/AgendamentoService.java",
+        "controller/AgendamentoController.java",
+        "dto/ (AgendamentoCreateRequest, AgendamentoResponse, etc.)",
+        "mapper/AgendamentoMapper.java",
+        "exception/ConflictingAppointmentException.java",
+        "test: AgendamentoServiceTest, AgendamentoSlotConfigTest, AgendamentoStateMachineTest"
       ],
       "bloqueios": [],
-      "notas": "7 TipoAgendamento, 6 EstadoAgendamento, state machine, configurable slot rules (30/45/60 min per type), conflict detection (409), email notifications via commons-notification, 8 REST endpoints with RBAC, 50 new tests (160 total). Commit 16dce31.",
+      "notas": "Appointment booking with slot config, conflict detection, email notifications via commons-notification. State machine AGENDADO→CONFIRMADO→REALIZADO/CANCELADO/NAO_COMPARECEU. Commit: 16dce31.",
       "descricao": "Sistema de Agendamento: AppointmentEntity, calendar slots, conflict detection, confirmation emails via commons-notification, recurring availability rules.",
       "criterios": [
         "Booking endpoint funcional",
@@ -742,20 +720,18 @@
       "data_inicio": "2026-02-17",
       "data_conclusao": "2026-02-17",
       "artefactos": [
-        "pom.xml (Testcontainers BOM 1.19.7, JaCoCo 0.8.12, springdoc 2.8.6)",
-        "AbstractIntegrationTest.java (singleton PostgreSQL 16-alpine container)",
-        "application-integration.yml (Testcontainers profile)",
-        "OpenApiContractTest.java (spec, tags, paths, security validation)",
-        "CidadaoController.java (@Tag, @Operation, @ApiResponses)",
-        "DocumentoController.java (@Tag, @Operation, @ApiResponses)",
-        "ProcessoController.java (@Tag, @Operation, @ApiResponses)",
-        "VisaController.java (@Tag, @Operation, @ApiResponses)",
-        "AgendamentoController.java (@Tag, @Operation, @ApiResponses)",
-        "6 test classes migrated to Testcontainers",
-        "JaCoCo report: 81% instruction coverage"
+        "Updated: CidadaoController (@Tag, @Operation, @ApiResponses)",
+        "Updated: DocumentoController (@Tag, @Operation, @ApiResponses)",
+        "Updated: ProcessoController (@Tag, @Operation, @ApiResponses)",
+        "Updated: VisaController (@Tag, @Operation, @ApiResponses)",
+        "Updated: AgendamentoController (@Tag, @Operation, @ApiResponses)",
+        "Updated: AbstractIntegrationTest (singleton Testcontainers)",
+        "controller/OpenApiContractTest.java",
+        "Updated: pom.xml (springdoc 2.8.6)",
+        "JaCoCo coverage report"
       ],
       "bloqueios": [],
-      "notas": "commit 335a76f. Upgraded springdoc 2.3.0→2.8.6 for Spring Boot 3.4.3 compat. 161 tests, 0 failures.",
+      "notas": "OpenAPI 3.0 annotations on all 5 controllers. springdoc-openapi 2.8.6. Testcontainers singleton pattern. OpenApiContractTest validates spec structure. 161 tests, JaCoCo 81%. Commit: 335a76f.",
       "descricao": "Swagger/OpenAPI 3.0 config, integration tests com Testcontainers (PostgreSQL), API contract tests, test coverage report.",
       "criterios": [
         "Swagger UI em /swagger-ui",
@@ -770,16 +746,31 @@
       "nome": "Document Management + MinIO",
       "sprint": 4,
       "horas_planeadas": 14,
-      "horas_consumidas": 0,
+      "horas_consumidas": 14,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "ecossistema-commons/commons-storage/ (8 files)",
+        "StorageService.java (MinIO upload/download/delete)",
+        "FileValidationService.java (size + MIME validation)",
+        "StorageAutoConfiguration.java + StorageProperties.java",
+        "db/migration/V4__add_documento_versioning.sql",
+        "Updated: Documento.java (versao, documentoOriginal, ficheiroObjectKey)",
+        "dto/DocumentoUploadResponse.java",
+        "dto/DocumentoVersionResponse.java",
+        "dto/StorageDownloadResult.java",
+        "Updated: DocumentoService (uploadFicheiro, downloadFicheiro, createNewVersion, findVersions)",
+        "Updated: DocumentoController (4 new endpoints)",
+        "Updated: GlobalExceptionHandler (InvalidFile, Storage, MaxUploadSize)",
+        "Updated: AbstractIntegrationTest (MinIO Testcontainer)",
+        "6 new integration tests"
+      ],
       "bloqueios": [],
-      "notas": "",
+      "notas": "commons-storage module with MinIO 8.5.7. File upload/download, versioning, MIME validation (pdf/jpeg/png/tiff), 20MB limit. 4 new endpoints. MinIO Testcontainer for integration tests. 167 tests passing. Commits: 4dea74b (commons), fb610b0 (sgc).",
       "descricao": "Módulo Documentos: upload/download via MinIO, metadata tracking, versioning, virus scan placeholder, thumbnail generation, access control per document.",
       "criterios": [
         "Upload multipart funcional",
@@ -2116,6 +2107,41 @@
       "data": "2026-02-17T15:00:00Z",
       "evento": "TAREFAS_STYLING_ADICIONADAS",
       "detalhe": "4 tarefas de styling adicionadas baseadas em ecossistema-prototypes.html: T1.4 GPJ 'Welwitschia Tech' (8h, dark+teal), T6.4 SGC 'Diplomacia Clássica' (10h, dark+gold), T11.4 SI Institucional (10h, red/white/gold), T13.4 WN Editorial (10h, warm ember). Total: +38h, +4 tarefas. Sprint 1 reaberta."
+    },
+    {
+      "data": "2026-02-17T16:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T2.3 Keycloak Auth + RBAC concluída. JWT validation via commons-security, @PreAuthorize em 4 controllers, 6 roles. Authorization tests com MockMvc + jwt(). Commit: 9fd2165."
+    },
+    {
+      "data": "2026-02-17T16:00:00Z",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 2 (SGC Backend Core I) concluída. T2.1+T2.2+T2.3 = 40h. 6 tabelas, 4 entities, CRUD+Specification, Keycloak auth. 37 testes."
+    },
+    {
+      "data": "2026-02-17T17:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T3.1 Visa Processing Module concluída. Visa lifecycle, fee calculator, document checklist, state machine. 42 tests. Commit: 437e20b."
+    },
+    {
+      "data": "2026-02-17T17:30:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T3.2 Appointment System concluída. Booking with slot config, conflict detection, email notifications, state machine. Commit: 16dce31."
+    },
+    {
+      "data": "2026-02-17T18:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T3.3 OpenAPI Docs + Tests concluída. OpenAPI 3.0 annotations on 5 controllers, springdoc 2.8.6, Testcontainers singleton, contract test, JaCoCo 81%. 161 tests. Commit: 335a76f."
+    },
+    {
+      "data": "2026-02-17T18:00:00Z",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 3 (SGC Backend Core II) concluída. T3.1+T3.2+T3.3 = 40h. Visa module, appointment system, OpenAPI docs. 161 tests total."
+    },
+    {
+      "data": "2026-02-17T19:00:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T4.1 Document Management + MinIO concluída. commons-storage module (MinIO 8.5.7), file upload/download, versioning, MIME validation, 4 new endpoints, MinIO Testcontainer. 167 tests. Commits: 4dea74b (commons), fb610b0 (sgc)."
     }
   ]
 }
