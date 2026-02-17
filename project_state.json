@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 266,
+    "horas_consumidas": 274,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 22,
-    "progresso_pct": 30.6,
+    "tarefas_concluidas": 23,
+    "progresso_pct": 31.9,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -512,14 +512,22 @@
       "nome": "GPJ \"Welwitschia Tech\" Theme",
       "sprint": 1,
       "horas_planeadas": 8,
-      "horas_consumidas": 0,
+      "horas_consumidas": 8,
       "fase": "GPJ",
       "repo": "ecossistema-gpj-frontend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
+      "artefactos": [
+        "Dark theme CSS variables (--bg:#080c12, --teal:#00d4aa, etc.)",
+        "Sora + Space Mono fonts",
+        "Compact 68px icon sidebar with hexagonal GP logo",
+        "Teal-cyan gradient active indicator bar",
+        "Ambient radial gradient glow effect",
+        "Material dark overrides (cards, menus, toolbar, spinner)",
+        "User avatar with initials, custom scrollbar"
+      ],
       "bloqueios": [],
       "notas": "Design system from ecossistema-prototypes.html (lines 597-794).",
       "descricao": "Aplicar design system 'Welwitschia Tech' ao GPJ frontend conforme protótipo. Tema futurista dark+teal para gestores de projecto.",
@@ -2228,6 +2236,11 @@
       "data": "2026-02-17",
       "evento": "T6.4 CONCLUIDA — SGC 'Diplomacia Clássica' dark+gold theme applied from prototype",
       "detalhes": "Dark theme (#0c0f14), gold accents (#c9a84c), Playfair Display + DM Sans fonts, embassy EA emblem, sectioned sidebar, Material dark overrides. 5 files, +399/-77 lines."
+    },
+    {
+      "data": "2026-02-17",
+      "evento": "T1.4 CONCLUIDA — GPJ 'Welwitschia Tech' dark+teal theme applied from prototype",
+      "detalhes": "Dark theme (#080c12), teal accents (#00d4aa), Sora + Space Mono fonts, compact 68px hex sidebar, ambient glow, Material dark overrides. 5 files, +306/-84 lines."
     }
   ]
 }
