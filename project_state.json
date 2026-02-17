@@ -8,11 +8,11 @@
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
     "horas_totais_planeadas": 858,
-    "horas_consumidas": 186,
+    "horas_consumidas": 200,
     "total_sprints": 20,
     "total_tarefas": 72,
-    "tarefas_concluidas": 15,
-    "progresso_pct": 20.8,
+    "tarefas_concluidas": 16,
+    "progresso_pct": 22.2,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -91,12 +91,12 @@
       "id": 4,
       "titulo": "SGC Backend Avançado I",
       "fase": "SGC-BE",
-      "estado": "EM_PROGRESSO",
+      "estado": "CONCLUIDA",
       "data_inicio": "2026-02-17",
       "data_fim": "2026-03-30",
       "horas_planeadas": 40,
-      "horas_consumidas": 26,
-      "progresso_pct": 67
+      "horas_consumidas": 40,
+      "progresso_pct": 100
     },
     {
       "id": 5,
@@ -809,13 +809,13 @@
       "nome": "Notarial Services Module",
       "sprint": 4,
       "horas_planeadas": 14,
-      "horas_consumidas": 0,
+      "horas_consumidas": 14,
       "fase": "SGC-BE",
       "repo": "ecossistema-sgc-backend",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-17",
+      "data_conclusao": "2026-02-17",
       "artefactos": [],
       "bloqueios": [],
       "notas": "",
@@ -2147,6 +2147,16 @@
       "data": "2026-02-17T20:00:00Z",
       "evento": "TAREFA_CONCLUIDA",
       "detalhe": "T4.2 Civil Registry Module concluída. Birth/marriage/death registration, state machine workflow (7 states), OpenPDF certificate generation, MinIO storage, 10 REST endpoints, 16 new files. 201 tests. Commit: f093611."
+    },
+    {
+      "data": "2026-02-17T20:30:00Z",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T4.3 Notarial Services Module concluída. 4 service types (procuracao, legalizacao, apostila, copia certificada), state machine, fee calculator (EUR), PDF certificates, 12 REST endpoints, 17 new files. 236 tests. Commit: b1a83ef."
+    },
+    {
+      "data": "2026-02-17T20:30:00Z",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 4 (SGC Backend Avançado I) concluída. T4.1+T4.2+T4.3 = 40h. Document management, civil registry, notarial services. 236 tests total."
     }
   ]
 }
