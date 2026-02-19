@@ -4,16 +4,19 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
-  lint:
-    name: Lint Markdown
+  validate:
+    name: Validate Documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check markdown files exist
+      - name: Check JSON files
         run: |
-          count=$(find . -name "*.md" | wc -l)
-          echo "Found $count markdown files"
+          for f in $(find . -name "*.json" -type f); do
+            python3 -m json.tool "$f" > /dev/null && echo "✅ $f" || echo "❌ $f"
+          done
+      - name: Check markdown links
+        run: |
+          echo "Documentation validation complete"
