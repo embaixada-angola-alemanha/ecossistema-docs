@@ -1,0 +1,1785 @@
+openapi: "3.0.3"
+
+info:
+  title: GOP API - Gestao de Operacoes da Plataforma
+  description: |
+    API de Gestao de Operacoes da Plataforma (GOP) do Ecossistema Digital da
+    Embaixada de Angola na Alemanha. Fornece funcionalidades de monitoramento
+    de servicos, gestao de incidentes, rastreamento de deployments, janelas
+    de manutencao, eventos do sistema e proxy de metricas Prometheus.
+  version: "0.1.0"
+  contact:
+    name: Equipa GOP
+    email: gop@embaixada-angola.de
+
+servers:
+  - url: http://localhost:8084
+    description: Local development
+  - url: https://gop-staging.embaixada-angola.site
+    description: Staging
+  - url: https://gop.embaixada-angola.site
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Dashboard
+    description: Painel de resumo operacional
+  - name: Services
+    description: Gestao de servicos monitorizados
+  - name: Incidents
+    description: Gestao de incidentes
+  - name: Deployments
+    description: Rastreamento de deployments
+  - name: Maintenance
+    description: Janelas de manutencao
+  - name: Events
+    description: Eventos do sistema
+  - name: Metrics
+    description: Proxy de metricas Prometheus
+
+paths:
+  # ─── Dashboard ────────────────────────────────────────────────────────
+  /api/dashboard:
+    get:
+      tags: [Dashboard]
+      operationId: getDashboard
+      summary: Obter resumo do painel operacional
+      description: |
+        Retorna um resumo com contagem de servicos por estado, incidentes
+        activos, deployments recentes, manutencoes agendadas e eventos do dia.
+      responses:
+        "200":
+          description: Resumo do dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseGopDashboardResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/dashboard/uptime:
+    get:
+      tags: [Dashboard]
+      operationId: getUptimeAll
+      summary: Obter uptime de todos os servicos
+      description: |
+        Retorna metricas de uptime (24h, 7d, 30d) para todos os servicos
+        monitorizados.
+      responses:
+        "200":
+          description: Lista de uptime de todos os servicos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseListUptimeResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ─── Monitored Services ──────────────────────────────────────────────
+  /api/services:
+    get:
+      tags: [Services]
+      operationId: findAllServices
+      summary: Listar todos os servicos monitorizados
+      responses:
+        "200":
+          description: Lista de servicos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMonitoredServiceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Services]
+      operationId: createService
+      summary: Criar novo servico monitorizado
+      description: Requer role GOP-ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoredServiceCreateRequest"
+      responses:
+        "201":
+          description: Servico criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMonitoredServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/services/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Services]
+      operationId: findServiceById
+      summary: Obter servico por ID
+      responses:
+        "200":
+          description: Detalhes do servico
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMonitoredServiceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Services]
+      operationId: updateService
+      summary: Actualizar servico monitorizado
+      description: Requer role GOP-ADMIN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoredServiceUpdateRequest"
+      responses:
+        "200":
+          description: Servico actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMonitoredServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Services]
+      operationId: deleteService
+      summary: Remover servico monitorizado
+      description: Requer role GOP-ADMIN.
+      responses:
+        "200":
+          description: Servico removido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/services/{id}/health-history:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Services]
+      operationId: getHealthHistory
+      summary: Obter historico de health checks de um servico
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Historico de health checks paginado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagedHealthCheckLogResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/services/{id}/uptime:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Services]
+      operationId: getServiceUptime
+      summary: Obter metricas de uptime de um servico
+      description: Retorna uptime percentual para 24h, 7d e 30d.
+      responses:
+        "200":
+          description: Metricas de uptime
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUptimeResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ─── Incidents ────────────────────────────────────────────────────────
+  /api/incidents:
+    get:
+      tags: [Incidents]
+      operationId: findAllIncidents
+      summary: Listar incidentes
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/IncidentStatus"
+        - name: severity
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/IncidentSeverity"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Lista paginada de incidentes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagedIncidentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Incidents]
+      operationId: createIncident
+      summary: Criar novo incidente
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. O campo reportedBy e preenchido automaticamente a partir do token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentCreateRequest"
+      responses:
+        "201":
+          description: Incidente criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIncidentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/incidents/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Incidents]
+      operationId: findIncidentById
+      summary: Obter incidente por ID
+      responses:
+        "200":
+          description: Detalhes do incidente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIncidentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/incidents/{id}/status:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [Incidents]
+      operationId: updateIncidentStatus
+      summary: Actualizar estado de um incidente
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentStatusUpdateBody"
+      responses:
+        "200":
+          description: Estado do incidente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIncidentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/incidents/{id}/updates:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Incidents]
+      operationId: addIncidentUpdate
+      summary: Adicionar actualizacao a um incidente
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. O campo author e preenchido automaticamente a partir do token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentUpdateRequest"
+      responses:
+        "200":
+          description: Actualizacao adicionada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIncidentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/incidents/{id}/resolve:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Incidents]
+      operationId: resolveIncident
+      summary: Resolver um incidente
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. Inclui causa raiz e resolucao.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentResolveRequest"
+      responses:
+        "200":
+          description: Incidente resolvido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIncidentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/incidents/{id}/close:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Incidents]
+      operationId: closeIncident
+      summary: Fechar um incidente
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR.
+      responses:
+        "200":
+          description: Incidente fechado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ─── Deployments ─────────────────────────────────────────────────────
+  /api/deployments:
+    get:
+      tags: [Deployments]
+      operationId: findAllDeployments
+      summary: Listar deployments
+      parameters:
+        - name: serviceId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filtrar por ID do servico
+        - name: environment
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/DeploymentEnvironment"
+          description: Filtrar por ambiente
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Lista paginada de deployments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagedDeploymentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Deployments]
+      operationId: createDeployment
+      summary: Registar novo deployment
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. O campo deployedBy e preenchido automaticamente a partir do token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeploymentCreateRequest"
+      responses:
+        "201":
+          description: Deployment registado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseDeploymentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/deployments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Deployments]
+      operationId: findDeploymentById
+      summary: Obter deployment por ID
+      responses:
+        "200":
+          description: Detalhes do deployment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseDeploymentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ─── Maintenance Windows ─────────────────────────────────────────────
+  /api/maintenance:
+    get:
+      tags: [Maintenance]
+      operationId: findAllMaintenance
+      summary: Listar janelas de manutencao
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MaintenanceStatus"
+          description: Filtrar por estado
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Lista paginada de janelas de manutencao
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagedMaintenanceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+    post:
+      tags: [Maintenance]
+      operationId: createMaintenance
+      summary: Agendar nova janela de manutencao
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. O campo createdByUser e preenchido automaticamente a partir do token JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaintenanceCreateRequest"
+      responses:
+        "201":
+          description: Manutencao agendada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/maintenance/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Maintenance]
+      operationId: findMaintenanceById
+      summary: Obter janela de manutencao por ID
+      responses:
+        "200":
+          description: Detalhes da janela de manutencao
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Maintenance]
+      operationId: updateMaintenance
+      summary: Actualizar janela de manutencao
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaintenanceUpdateRequest"
+      responses:
+        "200":
+          description: Manutencao actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/maintenance/{id}/start:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Maintenance]
+      operationId: startMaintenance
+      summary: Iniciar janela de manutencao
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. Muda o estado para IN_PROGRESS.
+      responses:
+        "200":
+          description: Manutencao iniciada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/maintenance/{id}/complete:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Maintenance]
+      operationId: completeMaintenance
+      summary: Completar janela de manutencao
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. Muda o estado para COMPLETED.
+      responses:
+        "200":
+          description: Manutencao completada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/maintenance/{id}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [Maintenance]
+      operationId: cancelMaintenance
+      summary: Cancelar janela de manutencao
+      description: Requer role GOP-ADMIN ou GOP-OPERATOR. Muda o estado para CANCELLED.
+      responses:
+        "200":
+          description: Manutencao cancelada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMaintenanceResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ─── System Events ──────────────────────────────────────────────────
+  /api/events:
+    get:
+      tags: [Events]
+      operationId: findAllEvents
+      summary: Listar eventos do sistema
+      parameters:
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por fonte do evento (e.g. sgc, si, wn)
+        - name: eventType
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar por tipo de evento
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Lista paginada de eventos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagedSystemEventResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/events/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      tags: [Events]
+      operationId: findEventById
+      summary: Obter evento por ID
+      responses:
+        "200":
+          description: Detalhes do evento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseSystemEventResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/events/stats/by-source:
+    get:
+      tags: [Events]
+      operationId: getEventsBySource
+      summary: Obter contagem de eventos por fonte
+      description: Retorna contagem de eventos agrupados por fonte nas ultimas N horas.
+      parameters:
+        - name: hours
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 24
+          description: Numero de horas para consulta (default 24)
+      responses:
+        "200":
+          description: Mapa de fonte para contagem
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringLong"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/events/stats/count-today:
+    get:
+      tags: [Events]
+      operationId: countEventsToday
+      summary: Obter contagem de eventos do dia
+      responses:
+        "200":
+          description: Contagem de eventos do dia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ─── Metrics Proxy ──────────────────────────────────────────────────
+  /api/metrics/query:
+    get:
+      tags: [Metrics]
+      operationId: queryPrometheus
+      summary: Executar query instantanea no Prometheus
+      description: |
+        Proxy para a API query do Prometheus. Executa uma query PromQL
+        instantanea e retorna o resultado como string JSON.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Expressao PromQL a executar
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "1h"
+          description: Periodo da query (nao utilizado directamente, reservado)
+      responses:
+        "200":
+          description: Resultado da query Prometheus (JSON como string)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseString"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/metrics/query-range:
+    get:
+      tags: [Metrics]
+      operationId: queryRangePrometheus
+      summary: Executar query de intervalo no Prometheus
+      description: |
+        Proxy para a API query_range do Prometheus. Executa uma query PromQL
+        num intervalo de tempo e retorna o resultado como string JSON.
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Expressao PromQL a executar
+        - name: start
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Timestamp de inicio (epoch seconds). Default 1 hora atras.
+        - name: end
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Timestamp de fim (epoch seconds). Default agora.
+        - name: step
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "60"
+          description: Intervalo de resolucao em segundos
+      responses:
+        "200":
+          description: Resultado da query de intervalo Prometheus (JSON como string)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseString"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+components:
+  # ─── Security Schemes ───────────────────────────────────────────────
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak OAuth2 Bearer Token (JWT)
+
+  # ─── Parameters ─────────────────────────────────────────────────────
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Identificador unico (UUID)
+
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Numero da pagina (0-indexed)
+
+    SizeParam:
+      name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Tamanho da pagina
+
+    SortParam:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+      description: "Ordenacao (e.g. createdAt,desc)"
+
+  # ─── Responses ──────────────────────────────────────────────────────
+  responses:
+    BadRequest:
+      description: Requisicao invalida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseVoid"
+    Unauthorized:
+      description: Nao autenticado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseVoid"
+    Forbidden:
+      description: Sem permissao
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseVoid"
+    NotFound:
+      description: Recurso nao encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiResponseVoid"
+
+  # ─── Schemas ────────────────────────────────────────────────────────
+  schemas:
+    # ── Enums ─────────────────────────────────────────────────────────
+    ServiceType:
+      type: string
+      enum: [BACKEND, FRONTEND, INFRA]
+      description: Tipo de servico monitorizado
+
+    ServiceStatus:
+      type: string
+      enum: [UP, DOWN, DEGRADED, UNKNOWN]
+      description: Estado actual do servico
+
+    IncidentSeverity:
+      type: string
+      enum: [P1, P2, P3, P4]
+      description: Severidade do incidente (P1=Critico, P4=Baixo)
+
+    IncidentStatus:
+      type: string
+      enum: [OPEN, INVESTIGATING, IDENTIFIED, MONITORING, RESOLVED, CLOSED]
+      description: Estado do incidente
+
+    DeploymentStatus:
+      type: string
+      enum: [SUCCESS, FAILED, ROLLING_BACK, ROLLED_BACK]
+      description: Estado do deployment
+
+    DeploymentEnvironment:
+      type: string
+      enum: [STAGING, PRODUCTION]
+      description: Ambiente de deployment
+
+    MaintenanceStatus:
+      type: string
+      enum: [SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED]
+      description: Estado da janela de manutencao
+
+    # ── Request DTOs ──────────────────────────────────────────────────
+    MonitoredServiceCreateRequest:
+      type: object
+      required: [name, displayName]
+      properties:
+        name:
+          type: string
+          description: Nome tecnico do servico (unico)
+          example: sgc-backend
+        displayName:
+          type: string
+          description: Nome de exibicao do servico
+          example: SGC Backend
+        type:
+          type: string
+          description: Tipo do servico (BACKEND, FRONTEND, INFRA)
+          example: BACKEND
+        healthUrl:
+          type: string
+          description: URL de health check do servico
+          example: http://sgc-backend:8081/actuator/health
+        metadata:
+          type: string
+          description: Metadados adicionais em formato JSON
+          example: '{"port": 8081}'
+
+    MonitoredServiceUpdateRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Nome de exibicao do servico
+        healthUrl:
+          type: string
+          description: URL de health check do servico
+        metadata:
+          type: string
+          description: Metadados adicionais em formato JSON
+
+    IncidentCreateRequest:
+      type: object
+      required: [title, severity]
+      properties:
+        title:
+          type: string
+          description: Titulo do incidente
+          example: SGC Backend - Timeout em queries
+        description:
+          type: string
+          description: Descricao detalhada do incidente
+        severity:
+          type: string
+          description: Severidade (P1, P2, P3, P4)
+          example: P2
+        affectedServiceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Lista de IDs dos servicos afectados
+        assignedTo:
+          type: string
+          description: Utilizador atribuido ao incidente
+
+    IncidentUpdateRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Mensagem de actualizacao do incidente
+          example: Identificada a causa raiz no pool de conexoes
+
+    IncidentResolveRequest:
+      type: object
+      required: [resolution]
+      properties:
+        rootCause:
+          type: string
+          description: Causa raiz do incidente
+          example: Pool de conexoes esgotado
+        resolution:
+          type: string
+          description: Resolucao aplicada
+          example: Aumentado o pool de conexoes de 10 para 50
+
+    IncidentStatusUpdateBody:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          description: Novo estado do incidente
+          example: INVESTIGATING
+
+    DeploymentCreateRequest:
+      type: object
+      required: [serviceId, versionTag, environment]
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+          description: ID do servico sendo implantado
+        versionTag:
+          type: string
+          description: Tag de versao do deployment
+          example: v1.2.3
+        commitHash:
+          type: string
+          description: Hash do commit Git
+          example: abc123def456
+        environment:
+          type: string
+          description: Ambiente de deployment (STAGING, PRODUCTION)
+          example: PRODUCTION
+        notes:
+          type: string
+          description: Notas adicionais sobre o deployment
+
+    MaintenanceCreateRequest:
+      type: object
+      required: [title, scheduledStart, scheduledEnd]
+      properties:
+        title:
+          type: string
+          description: Titulo da janela de manutencao
+          example: Actualizacao de base de dados SGC
+        description:
+          type: string
+          description: Descricao detalhada da manutencao
+        scheduledStart:
+          type: string
+          format: date-time
+          description: Inicio agendado (ISO 8601)
+          example: "2026-02-20T02:00:00Z"
+        scheduledEnd:
+          type: string
+          format: date-time
+          description: Fim agendado (ISO 8601)
+          example: "2026-02-20T04:00:00Z"
+        affectedServiceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Lista de IDs dos servicos afectados
+
+    MaintenanceUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Titulo da janela de manutencao
+        description:
+          type: string
+          description: Descricao detalhada da manutencao
+        scheduledStart:
+          type: string
+          format: date-time
+          description: Inicio agendado (ISO 8601)
+        scheduledEnd:
+          type: string
+          format: date-time
+          description: Fim agendado (ISO 8601)
+        affectedServiceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Lista de IDs dos servicos afectados
+
+    # ── Response DTOs ─────────────────────────────────────────────────
+    MonitoredServiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: sgc-backend
+        displayName:
+          type: string
+          example: SGC Backend
+        type:
+          type: string
+          example: BACKEND
+        status:
+          type: string
+          example: UP
+        lastCheckAt:
+          type: string
+          format: date-time
+          description: Data/hora do ultimo health check
+        responseTimeMs:
+          type: integer
+          format: int64
+          nullable: true
+          description: Tempo de resposta do ultimo health check (ms)
+        consecutiveFailures:
+          type: integer
+          description: Numero de falhas consecutivas
+        createdAt:
+          type: string
+          format: date-time
+
+    HealthCheckLogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        checkedAt:
+          type: string
+          format: date-time
+          description: Data/hora do check
+        status:
+          type: string
+          description: Resultado do check (UP, DOWN, etc.)
+        responseTimeMs:
+          type: integer
+          format: int64
+          nullable: true
+          description: Tempo de resposta (ms)
+        errorMessage:
+          type: string
+          nullable: true
+          description: Mensagem de erro (se houve falha)
+
+    UptimeResponse:
+      type: object
+      properties:
+        serviceId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+          example: SGC Backend
+        uptime24h:
+          type: number
+          format: double
+          description: Percentagem de uptime nas ultimas 24 horas
+          example: 99.95
+        uptime7d:
+          type: number
+          format: double
+          description: Percentagem de uptime nos ultimos 7 dias
+          example: 99.87
+        uptime30d:
+          type: number
+          format: double
+          description: Percentagem de uptime nos ultimos 30 dias
+          example: 99.92
+
+    IncidentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: SGC Backend - Timeout em queries
+        description:
+          type: string
+        severity:
+          type: string
+          example: P2
+        status:
+          type: string
+          example: OPEN
+        affectedServices:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonitoredServiceResponse"
+          description: Servicos afectados pelo incidente
+        reportedBy:
+          type: string
+          description: Utilizador que reportou o incidente
+        assignedTo:
+          type: string
+          nullable: true
+          description: Utilizador atribuido ao incidente
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data/hora da resolucao
+        rootCause:
+          type: string
+          nullable: true
+          description: Causa raiz do incidente
+        resolution:
+          type: string
+          nullable: true
+          description: Resolucao aplicada
+        updates:
+          type: array
+          items:
+            $ref: "#/components/schemas/IncidentUpdateResponse"
+          description: Historico de actualizacoes do incidente
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    IncidentUpdateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        message:
+          type: string
+          description: Mensagem da actualizacao
+        author:
+          type: string
+          description: Autor da actualizacao
+        createdAt:
+          type: string
+          format: date-time
+
+    DeploymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+          example: SGC Backend
+        versionTag:
+          type: string
+          example: v1.2.3
+        commitHash:
+          type: string
+          nullable: true
+          example: abc123def456
+        environment:
+          type: string
+          example: PRODUCTION
+        deployedBy:
+          type: string
+          description: Utilizador que fez o deployment
+        deployedAt:
+          type: string
+          format: date-time
+          description: Data/hora do deployment
+        status:
+          type: string
+          example: SUCCESS
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    MaintenanceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Actualizacao de base de dados SGC
+        description:
+          type: string
+          nullable: true
+        scheduledStart:
+          type: string
+          format: date-time
+          description: Inicio agendado
+        scheduledEnd:
+          type: string
+          format: date-time
+          description: Fim agendado
+        actualStart:
+          type: string
+          format: date-time
+          nullable: true
+          description: Inicio real
+        actualEnd:
+          type: string
+          format: date-time
+          nullable: true
+          description: Fim real
+        status:
+          type: string
+          example: SCHEDULED
+        affectedServices:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonitoredServiceResponse"
+          description: Servicos afectados pela manutencao
+        createdByUser:
+          type: string
+          description: Utilizador que criou a janela de manutencao
+        createdAt:
+          type: string
+          format: date-time
+
+    SystemEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+          description: ID unico do evento na fonte
+        source:
+          type: string
+          description: Fonte do evento (e.g. sgc, si, wn)
+          example: sgc
+        eventType:
+          type: string
+          description: Tipo do evento
+          example: CIDADAO_CREATED
+        entityType:
+          type: string
+          description: Tipo da entidade afectada
+          example: Cidadao
+        entityId:
+          type: string
+          description: ID da entidade afectada
+        timestamp:
+          type: string
+          format: date-time
+          description: Data/hora do evento na fonte
+        receivedAt:
+          type: string
+          format: date-time
+          description: Data/hora de recepcao no GOP
+
+    GopDashboardResponse:
+      type: object
+      properties:
+        servicesUp:
+          type: integer
+          format: int64
+          description: Numero de servicos com estado UP
+        servicesDown:
+          type: integer
+          format: int64
+          description: Numero de servicos com estado DOWN
+        servicesDegraded:
+          type: integer
+          format: int64
+          description: Numero de servicos com estado DEGRADED
+        activeIncidents:
+          type: integer
+          format: int64
+          description: Numero de incidentes activos
+        p1Incidents:
+          type: integer
+          format: int64
+          description: Numero de incidentes P1 activos
+        recentDeployments:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeploymentResponse"
+          description: Deployments recentes
+        upcomingMaintenance:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceResponse"
+          description: Janelas de manutencao agendadas
+        eventsToday:
+          type: integer
+          format: int64
+          description: Numero de eventos recebidos hoje
+
+    # ── ApiResponse Wrappers ──────────────────────────────────────────
+    ApiResponseVoid:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: string
+          description: Resultado da query Prometheus (JSON como string)
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseLong:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: integer
+          format: int64
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMapStringLong:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          description: Mapa de fonte para contagem
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseGopDashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/GopDashboardResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListUptimeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/UptimeResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListMonitoredServiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonitoredServiceResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMonitoredServiceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/MonitoredServiceResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseUptimeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/UptimeResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedHealthCheckLogResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagedHealthCheckLogResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedIncidentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagedIncidentResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseIncidentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/IncidentResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedDeploymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagedDeploymentResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseDeploymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/DeploymentResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedMaintenanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagedMaintenanceResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMaintenanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/MaintenanceResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedSystemEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagedSystemEventResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseSystemEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/SystemEventResponse"
+        timestamp:
+          type: string
+          format: date-time
+
+    # ── Paged Wrappers ────────────────────────────────────────────────
+    PagedHealthCheckLogResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/HealthCheckLogResponse"
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    PagedIncidentResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/IncidentResponse"
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    PagedDeploymentResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeploymentResponse"
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    PagedMaintenanceResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaintenanceResponse"
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    PagedSystemEventResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemEventResponse"
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer

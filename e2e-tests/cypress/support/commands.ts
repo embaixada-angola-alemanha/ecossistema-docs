@@ -39,7 +39,7 @@ Cypress.Commands.add('login', (role = 'admin') => {
     preferred_username: 'e2e-test-user',
     given_name: 'E2E',
     family_name: 'Tester',
-    email: 'e2e@embaixada-angola.de',
+    email: 'e2e@embaixada-angola.site',
     realm_access: { roles: roleMap[role] },
     resource_access: {
       'sgc-app': { roles: roleMap[role] },

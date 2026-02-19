@@ -1,0 +1,3362 @@
+openapi: "3.0.3"
+info:
+  title: SGC API - Servico de Gestao Consular
+  description: |
+    API do sistema de gestao consular da Embaixada de Angola na Alemanha.
+    Gere cidadaos, documentos, vistos, agendamentos, processos, registos civis,
+    servicos notariais, notificacoes e relatorios.
+  version: "0.1.0"
+  contact:
+    name: Ecossistema Digital - Embaixada de Angola
+    email: dev@embaixada-angola.de
+
+servers:
+  - url: http://localhost:8081
+    description: Development
+  - url: https://staging-sgc.embaixada-angola.de
+    description: Staging
+  - url: https://sgc.embaixada-angola.de
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Cidadaos
+    description: Gestao de cidadaos registados no sistema consular
+  - name: Documentos
+    description: Gestao de documentos de cidadaos
+  - name: Vistos
+    description: Pedidos de visto e processamento
+  - name: Agendamentos
+    description: Sistema de agendamento consular
+  - name: Processos
+    description: Processos consulares e seu ciclo de vida
+  - name: Registos Civis
+    description: Gestao de registos civis (nascimento, casamento, obito)
+  - name: Servicos Notariais
+    description: Gestao de servicos notariais (procuracoes, legalizacoes, apostilas, copias certificadas)
+  - name: Notificacoes
+    description: Gestao de preferencias e historico de notificacoes
+  - name: Relatorios
+    description: Dashboard, estatisticas, audit e exportacao
+
+paths:
+  # ── Cidadaos ──────────────────────────────────────────────────────────
+  /api/v1/cidadaos:
+    post:
+      tags: [Cidadaos]
+      operationId: createCidadao
+      summary: Criar cidadao
+      description: Regista um novo cidadao no sistema consular
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CidadaoCreateRequest'
+      responses:
+        '201':
+          description: Cidadao criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+        '400':
+          description: Dados invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '409':
+          description: Passaporte duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+    get:
+      tags: [Cidadaos]
+      operationId: listCidadaos
+      summary: Listar cidadaos
+      description: Lista cidadaos com filtros opcionais por nome, estado, sexo e nacionalidade
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoCidadao'
+        - name: sexo
+          in: query
+          schema:
+            $ref: '#/components/schemas/Sexo'
+        - name: nacionalidade
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de cidadaos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedCidadaoResponse'
+
+  /api/v1/cidadaos/me:
+    get:
+      tags: [Cidadaos]
+      operationId: getCidadaoMe
+      summary: Obter perfil proprio
+      description: Retorna o perfil do cidadao associado a conta autenticada
+      responses:
+        '200':
+          description: Perfil encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+        '404':
+          description: Perfil nao associado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /api/v1/cidadaos/{id}:
+    get:
+      tags: [Cidadaos]
+      operationId: getCidadaoById
+      summary: Obter cidadao por ID
+      description: Retorna os dados de um cidadao pelo seu identificador
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Cidadao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+        '404':
+          description: Cidadao nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+    put:
+      tags: [Cidadaos]
+      operationId: updateCidadao
+      summary: Actualizar cidadao
+      description: Actualiza os dados pessoais de um cidadao
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CidadaoUpdateRequest'
+      responses:
+        '200':
+          description: Cidadao actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+        '404':
+          description: Cidadao nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+    delete:
+      tags: [Cidadaos]
+      operationId: deleteCidadao
+      summary: Eliminar cidadao
+      description: Remove permanentemente um cidadao do sistema
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Cidadao eliminado
+        '404':
+          description: Cidadao nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /api/v1/cidadaos/{id}/estado:
+    patch:
+      tags: [Cidadaos]
+      operationId: updateCidadaoEstado
+      summary: Alterar estado do cidadao
+      description: Altera o estado de um cidadao (ACTIVO, INACTIVO, SUSPENSO)
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+
+  /api/v1/cidadaos/{id}/link:
+    patch:
+      tags: [Cidadaos]
+      operationId: linkKeycloak
+      summary: Associar conta Keycloak
+      description: Associa um cidadao a uma conta Keycloak pelo keycloakId
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                keycloakId:
+                  type: string
+              required: [keycloakId]
+      responses:
+        '200':
+          description: Conta associada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCidadaoResponse'
+        '404':
+          description: Cidadao nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  # ── Documentos ────────────────────────────────────────────────────────
+  /api/v1/cidadaos/{cidadaoId}/documentos:
+    post:
+      tags: [Documentos]
+      operationId: createDocumento
+      summary: Criar documento
+      description: Associa um novo documento a um cidadao
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoCreateRequest'
+      responses:
+        '201':
+          description: Documento criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoResponse'
+        '400':
+          description: Dados invalidos
+        '404':
+          description: Cidadao nao encontrado
+    get:
+      tags: [Documentos]
+      operationId: listDocumentosByCidadao
+      summary: Listar documentos do cidadao
+      description: Lista todos os documentos associados a um cidadao
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Documentos listados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedDocumentoResponse'
+
+  /api/v1/cidadaos/{cidadaoId}/documentos/{id}:
+    get:
+      tags: [Documentos]
+      operationId: getDocumentoById
+      summary: Obter documento por ID
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Documento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoResponse'
+        '404':
+          description: Documento nao encontrado
+    put:
+      tags: [Documentos]
+      operationId: updateDocumento
+      summary: Actualizar documento
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentoUpdateRequest'
+      responses:
+        '200':
+          description: Documento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoResponse'
+        '404':
+          description: Documento nao encontrado
+    delete:
+      tags: [Documentos]
+      operationId: deleteDocumento
+      summary: Eliminar documento
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Documento eliminado
+        '404':
+          description: Documento nao encontrado
+
+  /api/v1/cidadaos/{cidadaoId}/documentos/{id}/estado:
+    patch:
+      tags: [Documentos]
+      operationId: updateDocumentoEstado
+      summary: Alterar estado do documento
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoResponse'
+
+  /api/v1/cidadaos/{cidadaoId}/documentos/{id}/ficheiro:
+    post:
+      tags: [Documentos]
+      operationId: uploadFicheiro
+      summary: Upload de ficheiro
+      description: Faz upload de um ficheiro para um documento existente
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        '200':
+          description: Ficheiro carregado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoUploadResponse'
+        '400':
+          description: Ficheiro invalido
+        '404':
+          description: Documento nao encontrado
+        '413':
+          description: Ficheiro demasiado grande
+    get:
+      tags: [Documentos]
+      operationId: downloadFicheiro
+      summary: Download de ficheiro
+      description: Faz download do ficheiro associado a um documento
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Ficheiro retornado
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Documento ou ficheiro nao encontrado
+
+  /api/v1/cidadaos/{cidadaoId}/documentos/{id}/versoes:
+    post:
+      tags: [Documentos]
+      operationId: createDocumentoVersion
+      summary: Criar nova versao
+      description: Cria uma nova versao do documento com um novo ficheiro
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        '201':
+          description: Nova versao criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseDocumentoUploadResponse'
+    get:
+      tags: [Documentos]
+      operationId: listDocumentoVersions
+      summary: Listar versoes
+      description: Lista todas as versoes de um documento
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Versoes listadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListDocumentoVersionResponse'
+
+  # ── Vistos ────────────────────────────────────────────────────────────
+  /api/v1/visas:
+    post:
+      tags: [Vistos]
+      operationId: createVisa
+      summary: Criar pedido de visto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisaCreateRequest'
+      responses:
+        '201':
+          description: Pedido criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+        '400':
+          description: Dados invalidos
+        '404':
+          description: Cidadao nao encontrado
+    get:
+      tags: [Vistos]
+      operationId: listVisas
+      summary: Listar vistos
+      parameters:
+        - name: cidadaoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoVisto'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoVisto'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de vistos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedVisaResponse'
+
+  /api/v1/visas/{id}:
+    get:
+      tags: [Vistos]
+      operationId: getVisaById
+      summary: Obter visto por ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Visto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+        '404':
+          description: Visto nao encontrado
+    put:
+      tags: [Vistos]
+      operationId: updateVisa
+      summary: Actualizar visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisaUpdateRequest'
+      responses:
+        '200':
+          description: Visto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+    delete:
+      tags: [Vistos]
+      operationId: deleteVisa
+      summary: Eliminar visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Visto eliminado
+
+  /api/v1/visas/{id}/estado:
+    patch:
+      tags: [Vistos]
+      operationId: updateVisaEstado
+      summary: Alterar estado do visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                comentario:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+        '409':
+          description: Transicao de estado invalida
+
+  /api/v1/visas/{id}/historico:
+    get:
+      tags: [Vistos]
+      operationId: getVisaHistorico
+      summary: Historico do visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedVisaHistoricoResponse'
+
+  /api/v1/visas/{id}/documentos/{documentoId}:
+    post:
+      tags: [Vistos]
+      operationId: addDocumentoToVisa
+      summary: Associar documento ao visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento associado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+    delete:
+      tags: [Vistos]
+      operationId: removeDocumentoFromVisa
+      summary: Desassociar documento do visto
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento desassociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaResponse'
+
+  /api/v1/visas/fees:
+    get:
+      tags: [Vistos]
+      operationId: getVisaFee
+      summary: Consultar taxa de visto
+      parameters:
+        - name: tipo
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/TipoVisto'
+      responses:
+        '200':
+          description: Taxa retornada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaFeeResponse'
+
+  /api/v1/visas/checklist:
+    get:
+      tags: [Vistos]
+      operationId: getVisaChecklist
+      summary: Consultar checklist de documentos
+      parameters:
+        - name: tipo
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/TipoVisto'
+      responses:
+        '200':
+          description: Checklist retornada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVisaChecklistResponse'
+
+  # ── Agendamentos ──────────────────────────────────────────────────────
+  /api/v1/agendamentos:
+    post:
+      tags: [Agendamentos]
+      operationId: createAgendamento
+      summary: Criar agendamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgendamentoCreateRequest'
+      responses:
+        '201':
+          description: Agendamento criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAgendamentoResponse'
+        '400':
+          description: Dados invalidos
+        '409':
+          description: Conflito de horario
+    get:
+      tags: [Agendamentos]
+      operationId: listAgendamentos
+      summary: Listar agendamentos
+      parameters:
+        - name: cidadaoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoAgendamento'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoAgendamento'
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de agendamentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedAgendamentoResponse'
+
+  /api/v1/agendamentos/{id}:
+    get:
+      tags: [Agendamentos]
+      operationId: getAgendamentoById
+      summary: Obter agendamento por ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Agendamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAgendamentoResponse'
+        '404':
+          description: Agendamento nao encontrado
+    put:
+      tags: [Agendamentos]
+      operationId: rescheduleAgendamento
+      summary: Reagendar agendamento
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgendamentoUpdateRequest'
+      responses:
+        '200':
+          description: Agendamento reagendado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAgendamentoResponse'
+        '409':
+          description: Conflito de horario
+    delete:
+      tags: [Agendamentos]
+      operationId: deleteAgendamento
+      summary: Eliminar agendamento
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Agendamento eliminado
+
+  /api/v1/agendamentos/{id}/estado:
+    patch:
+      tags: [Agendamentos]
+      operationId: updateAgendamentoEstado
+      summary: Alterar estado do agendamento
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                comentario:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAgendamentoResponse'
+
+  /api/v1/agendamentos/{id}/historico:
+    get:
+      tags: [Agendamentos]
+      operationId: getAgendamentoHistorico
+      summary: Historico do agendamento
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedAgendamentoHistoricoResponse'
+
+  /api/v1/agendamentos/slots:
+    get:
+      tags: [Agendamentos]
+      operationId: getAvailableSlots
+      summary: Consultar slots disponiveis
+      parameters:
+        - name: tipo
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/TipoAgendamento'
+        - name: data
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Slots retornados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListSlotDisponivelResponse'
+
+  # ── Processos ─────────────────────────────────────────────────────────
+  /api/v1/processos:
+    post:
+      tags: [Processos]
+      operationId: createProcesso
+      summary: Criar processo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessoCreateRequest'
+      responses:
+        '201':
+          description: Processo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+        '400':
+          description: Dados invalidos
+    get:
+      tags: [Processos]
+      operationId: listProcessos
+      summary: Listar processos
+      parameters:
+        - name: cidadaoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoProcesso'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoProcesso'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de processos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedProcessoResponse'
+
+  /api/v1/processos/{id}:
+    get:
+      tags: [Processos]
+      operationId: getProcessoById
+      summary: Obter processo por ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Processo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+        '404':
+          description: Processo nao encontrado
+    put:
+      tags: [Processos]
+      operationId: updateProcesso
+      summary: Actualizar processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessoUpdateRequest'
+      responses:
+        '200':
+          description: Processo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+    delete:
+      tags: [Processos]
+      operationId: deleteProcesso
+      summary: Eliminar processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Processo eliminado
+
+  /api/v1/processos/{id}/estado:
+    patch:
+      tags: [Processos]
+      operationId: updateProcessoEstado
+      summary: Alterar estado do processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                comentario:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+        '409':
+          description: Transicao invalida
+
+  /api/v1/processos/{id}/historico:
+    get:
+      tags: [Processos]
+      operationId: getProcessoHistorico
+      summary: Historico do processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedProcessoHistoricoResponse'
+
+  /api/v1/processos/{id}/documentos/{documentoId}:
+    post:
+      tags: [Processos]
+      operationId: addDocumentoToProcesso
+      summary: Associar documento ao processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento associado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+    delete:
+      tags: [Processos]
+      operationId: removeDocumentoFromProcesso
+      summary: Desassociar documento do processo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento desassociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseProcessoResponse'
+
+  # ── Registos Civis ────────────────────────────────────────────────────
+  /api/v1/registos-civis:
+    post:
+      tags: [Registos Civis]
+      operationId: createRegistoCivil
+      summary: Criar registo civil
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistoCivilCreateRequest'
+      responses:
+        '201':
+          description: Registo criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+        '400':
+          description: Dados invalidos
+    get:
+      tags: [Registos Civis]
+      operationId: listRegistosCivis
+      summary: Listar registos civis
+      parameters:
+        - name: cidadaoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoRegistoCivil'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoRegistoCivil'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de registos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedRegistoCivilResponse'
+
+  /api/v1/registos-civis/{id}:
+    get:
+      tags: [Registos Civis]
+      operationId: getRegistoCivilById
+      summary: Obter registo civil por ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Registo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+        '404':
+          description: Registo nao encontrado
+    put:
+      tags: [Registos Civis]
+      operationId: updateRegistoCivil
+      summary: Actualizar registo civil
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistoCivilUpdateRequest'
+      responses:
+        '200':
+          description: Registo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+    delete:
+      tags: [Registos Civis]
+      operationId: deleteRegistoCivil
+      summary: Eliminar registo civil
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Registo eliminado
+
+  /api/v1/registos-civis/{id}/estado:
+    patch:
+      tags: [Registos Civis]
+      operationId: updateRegistoCivilEstado
+      summary: Alterar estado do registo civil
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                comentario:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+
+  /api/v1/registos-civis/{id}/historico:
+    get:
+      tags: [Registos Civis]
+      operationId: getRegistoCivilHistorico
+      summary: Historico do registo civil
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedRegistoCivilHistoricoResponse'
+
+  /api/v1/registos-civis/{id}/documentos/{documentoId}:
+    post:
+      tags: [Registos Civis]
+      operationId: addDocumentoToRegistoCivil
+      summary: Associar documento ao registo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento associado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+    delete:
+      tags: [Registos Civis]
+      operationId: removeDocumentoFromRegistoCivil
+      summary: Desassociar documento do registo
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento desassociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRegistoCivilResponse'
+
+  /api/v1/registos-civis/{id}/certificado:
+    get:
+      tags: [Registos Civis]
+      operationId: downloadCertificadoRegistoCivil
+      summary: Descarregar certificado
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Certificado encontrado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Certificado nao encontrado
+
+  # ── Servicos Notariais ────────────────────────────────────────────────
+  /api/v1/servicos-notariais:
+    post:
+      tags: [Servicos Notariais]
+      operationId: createServicoNotarial
+      summary: Criar servico notarial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicoNotarialCreateRequest'
+      responses:
+        '201':
+          description: Servico criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+        '400':
+          description: Dados invalidos
+    get:
+      tags: [Servicos Notariais]
+      operationId: listServicosNotariais
+      summary: Listar servicos notariais
+      parameters:
+        - name: cidadaoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoServicoNotarial'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoServicoNotarial'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Lista de servicos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedServicoNotarialResponse'
+
+  /api/v1/servicos-notariais/{id}:
+    get:
+      tags: [Servicos Notariais]
+      operationId: getServicoNotarialById
+      summary: Obter servico notarial por ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Servico encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+    put:
+      tags: [Servicos Notariais]
+      operationId: updateServicoNotarial
+      summary: Actualizar servico notarial
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicoNotarialUpdateRequest'
+      responses:
+        '200':
+          description: Servico actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+    delete:
+      tags: [Servicos Notariais]
+      operationId: deleteServicoNotarial
+      summary: Eliminar servico notarial
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Servico eliminado
+
+  /api/v1/servicos-notariais/{id}/estado:
+    patch:
+      tags: [Servicos Notariais]
+      operationId: updateServicoNotarialEstado
+      summary: Alterar estado do servico notarial
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                comentario:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Estado alterado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+
+  /api/v1/servicos-notariais/{id}/pagamento:
+    patch:
+      tags: [Servicos Notariais]
+      operationId: markTaxaPaga
+      summary: Marcar taxa como paga
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Taxa marcada como paga
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+
+  /api/v1/servicos-notariais/{id}/historico:
+    get:
+      tags: [Servicos Notariais]
+      operationId: getServicoNotarialHistorico
+      summary: Historico do servico notarial
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedServicoNotarialHistoricoResponse'
+
+  /api/v1/servicos-notariais/{id}/documentos/{documentoId}:
+    post:
+      tags: [Servicos Notariais]
+      operationId: addDocumentoToServicoNotarial
+      summary: Associar documento ao servico
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento associado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+    delete:
+      tags: [Servicos Notariais]
+      operationId: removeDocumentoFromServicoNotarial
+      summary: Desassociar documento do servico
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - $ref: '#/components/parameters/documentoIdPath'
+      responses:
+        '200':
+          description: Documento desassociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseServicoNotarialResponse'
+
+  /api/v1/servicos-notariais/{id}/certificado:
+    get:
+      tags: [Servicos Notariais]
+      operationId: downloadCertificadoNotarial
+      summary: Descarregar certificado notarial
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Certificado encontrado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Certificado nao encontrado
+
+  /api/v1/servicos-notariais/fees:
+    get:
+      tags: [Servicos Notariais]
+      operationId: getNotarialFee
+      summary: Consultar taxa de servico notarial
+      parameters:
+        - name: tipo
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/TipoServicoNotarial'
+      responses:
+        '200':
+          description: Taxa retornada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseNotarialFeeResponse'
+
+  # ── Notificacoes ──────────────────────────────────────────────────────
+  /api/v1/notificacoes/preferencias/{cidadaoId}:
+    get:
+      tags: [Notificacoes]
+      operationId: getNotificationPreferences
+      summary: Obter preferencias de notificacao de um cidadao
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+      responses:
+        '200':
+          description: Preferencias obtidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListNotificationPreferenceResponse'
+    put:
+      tags: [Notificacoes]
+      operationId: updateNotificationPreferences
+      summary: Actualizar preferencias de notificacao de um cidadao
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceUpdateRequest'
+      responses:
+        '200':
+          description: Preferencias actualizadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListNotificationPreferenceResponse'
+
+  /api/v1/notificacoes/historico/{cidadaoId}:
+    get:
+      tags: [Notificacoes]
+      operationId: getNotificationHistoricoByCidadao
+      summary: Obter historico de notificacoes de um cidadao
+      parameters:
+        - $ref: '#/components/parameters/cidadaoIdPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico obtido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedNotificationLogResponse'
+
+  /api/v1/notificacoes/historico:
+    get:
+      tags: [Notificacoes]
+      operationId: getAllNotificationHistorico
+      summary: Obter historico de todas as notificacoes
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Historico obtido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedNotificationLogResponse'
+
+  # ── Relatorios ────────────────────────────────────────────────────────
+  /api/v1/relatorios/dashboard:
+    get:
+      tags: [Relatorios]
+      operationId: getDashboard
+      summary: Dashboard resumo
+      parameters:
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Dashboard retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResumoResponse'
+
+  /api/v1/relatorios/estatisticas:
+    get:
+      tags: [Relatorios]
+      operationId: getEstatisticas
+      summary: Estatisticas
+      parameters:
+        - name: modulo
+          in: query
+          schema:
+            type: string
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: tipo
+          in: query
+          schema:
+            type: string
+        - name: estado
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estatisticas retornadas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstatisticasResponse'
+
+  /api/v1/relatorios/audit:
+    get:
+      tags: [Relatorios]
+      operationId: getAuditEvents
+      summary: Audit events
+      parameters:
+        - name: modulo
+          in: query
+          schema:
+            type: string
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Audit events retornados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAuditEventResponse'
+
+  /api/v1/relatorios/export/csv/{modulo}:
+    get:
+      tags: [Relatorios]
+      operationId: exportCsv
+      summary: Exportar CSV
+      parameters:
+        - name: modulo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: CSV exportado
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+  /api/v1/relatorios/export/pdf/dashboard:
+    get:
+      tags: [Relatorios]
+      operationId: exportDashboardPdf
+      summary: Exportar dashboard PDF
+      parameters:
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: PDF exportado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /api/v1/relatorios/export/pdf/{modulo}:
+    get:
+      tags: [Relatorios]
+      operationId: exportModulePdf
+      summary: Exportar modulo PDF
+      parameters:
+        - name: modulo
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: dataInicio
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: dataFim
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: PDF exportado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak OAuth2 JWT token
+
+  parameters:
+    idPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    cidadaoIdPath:
+      name: cidadaoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    documentoIdPath:
+      name: documentoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 0
+    size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        default: 20
+    sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    # ── Enums ─────────────────────────────────────────────────────────
+    EstadoCidadao:
+      type: string
+      enum: [ACTIVO, INACTIVO, SUSPENSO]
+    Sexo:
+      type: string
+      enum: [MASCULINO, FEMININO]
+    EstadoCivil:
+      type: string
+      enum: [SOLTEIRO, CASADO, DIVORCIADO, VIUVO, UNIAO_FACTO]
+    TipoDocumento:
+      type: string
+      enum: [PASSAPORTE, BILHETE_IDENTIDADE, CERTIDAO_NASCIMENTO, CERTIDAO_CASAMENTO, PROCURACAO, DECLARACAO, OUTRO]
+    EstadoDocumento:
+      type: string
+      enum: [PENDENTE, VERIFICADO, REJEITADO, EXPIRADO]
+    TipoVisto:
+      type: string
+      enum: [TURISTA, NEGOCIO, TRABALHO, ESTUDANTE, TRANSITO, FAMILIAR, DIPLOMATICO, CORTESIA]
+    EstadoVisto:
+      type: string
+      enum: [RASCUNHO, SUBMETIDO, EM_ANALISE, DOCUMENTOS_PENDENTES, APROVADO, REJEITADO, EMITIDO, CANCELADO]
+    TipoAgendamento:
+      type: string
+      enum: [PASSAPORTE, VISTO, LEGALIZACAO, REGISTO_CONSULAR, CERTIDAO, NOTARIADO, CONSULTA_GERAL]
+    EstadoAgendamento:
+      type: string
+      enum: [PENDENTE, CONFIRMADO, REAGENDADO, CANCELADO, COMPLETADO, NAO_COMPARECEU]
+    TipoProcesso:
+      type: string
+      enum: [PASSAPORTE, VISTO, LEGALIZACAO, REGISTO_CONSULAR, CERTIDAO, PROCURACAO, NOTARIADO, OUTRO]
+    EstadoProcesso:
+      type: string
+      enum: [RASCUNHO, SUBMETIDO, EM_ANALISE, APROVADO, REJEITADO, CONCLUIDO, CANCELADO]
+    Prioridade:
+      type: string
+      enum: [BAIXA, NORMAL, ALTA, URGENTE]
+    TipoRegistoCivil:
+      type: string
+      enum: [NASCIMENTO, CASAMENTO, OBITO]
+    EstadoRegistoCivil:
+      type: string
+      enum: [RASCUNHO, SUBMETIDO, EM_VERIFICACAO, VERIFICADO, CERTIFICADO_EMITIDO, REJEITADO, CANCELADO]
+    TipoServicoNotarial:
+      type: string
+      enum: [PROCURACAO, LEGALIZACAO, APOSTILA, COPIA_CERTIFICADA]
+    EstadoServicoNotarial:
+      type: string
+      enum: [RASCUNHO, SUBMETIDO, EM_PROCESSAMENTO, CONCLUIDO, REJEITADO, CANCELADO]
+    EstadoNotificacao:
+      type: string
+      enum: [PENDENTE, ENVIADO, FALHOU]
+
+    # ── Common ────────────────────────────────────────────────────────
+    ApiResponseError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        data:
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    PagedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: {}
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    # ── Cidadao DTOs ──────────────────────────────────────────────────
+    CidadaoCreateRequest:
+      type: object
+      required: [numeroPassaporte, nomeCompleto]
+      properties:
+        numeroPassaporte:
+          type: string
+          pattern: '^[A-Za-z0-9\-]+$'
+          maxLength: 50
+        nomeCompleto:
+          type: string
+          maxLength: 255
+        dataNascimento:
+          type: string
+          format: date
+        sexo:
+          $ref: '#/components/schemas/Sexo'
+        nacionalidade:
+          type: string
+          maxLength: 100
+        estadoCivil:
+          $ref: '#/components/schemas/EstadoCivil'
+        email:
+          type: string
+          format: email
+        telefone:
+          type: string
+          maxLength: 50
+        enderecoAngola:
+          type: string
+          maxLength: 500
+        enderecoAlemanha:
+          type: string
+          maxLength: 500
+
+    CidadaoUpdateRequest:
+      type: object
+      properties:
+        nomeCompleto:
+          type: string
+          maxLength: 255
+        dataNascimento:
+          type: string
+          format: date
+        sexo:
+          $ref: '#/components/schemas/Sexo'
+        nacionalidade:
+          type: string
+          maxLength: 100
+        estadoCivil:
+          $ref: '#/components/schemas/EstadoCivil'
+        email:
+          type: string
+          format: email
+        telefone:
+          type: string
+          maxLength: 50
+        enderecoAngola:
+          type: string
+        enderecoAlemanha:
+          type: string
+
+    CidadaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        numeroPassaporte:
+          type: string
+        nomeCompleto:
+          type: string
+        dataNascimento:
+          type: string
+          format: date
+        sexo:
+          $ref: '#/components/schemas/Sexo'
+        nacionalidade:
+          type: string
+        estadoCivil:
+          $ref: '#/components/schemas/EstadoCivil'
+        email:
+          type: string
+        telefone:
+          type: string
+        enderecoAngola:
+          type: string
+        enderecoAlemanha:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoCidadao'
+        keycloakId:
+          type: string
+        documentoCount:
+          type: integer
+        processoCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Documento DTOs ────────────────────────────────────────────────
+    DocumentoCreateRequest:
+      type: object
+      required: [tipo]
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoDocumento'
+        numero:
+          type: string
+        dataEmissao:
+          type: string
+          format: date
+        dataValidade:
+          type: string
+          format: date
+        ficheiroUrl:
+          type: string
+        ficheiroNome:
+          type: string
+        ficheiroTamanho:
+          type: integer
+          format: int64
+        ficheiroTipo:
+          type: string
+
+    DocumentoUpdateRequest:
+      type: object
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoDocumento'
+        numero:
+          type: string
+        dataEmissao:
+          type: string
+          format: date
+        dataValidade:
+          type: string
+          format: date
+        ficheiroUrl:
+          type: string
+        ficheiroNome:
+          type: string
+        ficheiroTamanho:
+          type: integer
+          format: int64
+        ficheiroTipo:
+          type: string
+
+    DocumentoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoDocumento'
+        numero:
+          type: string
+        dataEmissao:
+          type: string
+          format: date
+        dataValidade:
+          type: string
+          format: date
+        ficheiroUrl:
+          type: string
+        ficheiroNome:
+          type: string
+        ficheiroTamanho:
+          type: integer
+          format: int64
+        ficheiroTipo:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoDocumento'
+        versao:
+          type: integer
+        documentoOriginalId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DocumentoUploadResponse:
+      type: object
+      properties:
+        documentoId:
+          type: string
+          format: uuid
+        ficheiroNome:
+          type: string
+        ficheiroTamanho:
+          type: integer
+          format: int64
+        ficheiroTipo:
+          type: string
+        ficheiroUrl:
+          type: string
+        versao:
+          type: integer
+
+    DocumentoVersionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        versao:
+          type: integer
+        ficheiroNome:
+          type: string
+        ficheiroTamanho:
+          type: integer
+          format: int64
+        ficheiroTipo:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoDocumento'
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Visa DTOs ─────────────────────────────────────────────────────
+    VisaCreateRequest:
+      type: object
+      required: [cidadaoId, tipo]
+      properties:
+        cidadaoId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoVisto'
+        nacionalidadePassaporte:
+          type: string
+          maxLength: 100
+        motivoViagem:
+          type: string
+          maxLength: 500
+        dataEntrada:
+          type: string
+          format: date
+        dataSaida:
+          type: string
+          format: date
+        localAlojamento:
+          type: string
+          maxLength: 500
+        entidadeConvite:
+          type: string
+          maxLength: 255
+        observacoes:
+          type: string
+          maxLength: 2000
+
+    VisaUpdateRequest:
+      type: object
+      properties:
+        motivoViagem:
+          type: string
+          maxLength: 500
+        dataEntrada:
+          type: string
+          format: date
+        dataSaida:
+          type: string
+          format: date
+        localAlojamento:
+          type: string
+          maxLength: 500
+        entidadeConvite:
+          type: string
+          maxLength: 255
+        responsavel:
+          type: string
+          maxLength: 100
+        observacoes:
+          type: string
+          maxLength: 2000
+
+    VisaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoVisto'
+        numeroVisto:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoVisto'
+        nacionalidadePassaporte:
+          type: string
+        motivoViagem:
+          type: string
+        dataEntrada:
+          type: string
+          format: date
+        dataSaida:
+          type: string
+          format: date
+        localAlojamento:
+          type: string
+        entidadeConvite:
+          type: string
+        responsavel:
+          type: string
+        valorTaxa:
+          type: number
+        taxaPaga:
+          type: boolean
+        dataSubmissao:
+          type: string
+          format: date-time
+        dataDecisao:
+          type: string
+          format: date-time
+        motivoRejeicao:
+          type: string
+        observacoes:
+          type: string
+        documentoCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    VisaHistoricoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        visaId:
+          type: string
+          format: uuid
+        estadoAnterior:
+          $ref: '#/components/schemas/EstadoVisto'
+        estadoNovo:
+          $ref: '#/components/schemas/EstadoVisto'
+        comentario:
+          type: string
+        alteradoPor:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    VisaFeeResponse:
+      type: object
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoVisto'
+        valor:
+          type: number
+        moeda:
+          type: string
+        isento:
+          type: boolean
+
+    VisaChecklistResponse:
+      type: object
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoVisto'
+        documentosRequeridos:
+          type: array
+          items:
+            type: string
+
+    # ── Agendamento DTOs ──────────────────────────────────────────────
+    AgendamentoCreateRequest:
+      type: object
+      required: [cidadaoId, tipo, dataHora]
+      properties:
+        cidadaoId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoAgendamento'
+        dataHora:
+          type: string
+          format: date-time
+        notas:
+          type: string
+
+    AgendamentoUpdateRequest:
+      type: object
+      required: [dataHora]
+      properties:
+        dataHora:
+          type: string
+          format: date-time
+        notas:
+          type: string
+
+    AgendamentoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        cidadaoEmail:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoAgendamento'
+        numeroAgendamento:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoAgendamento'
+        dataHora:
+          type: string
+          format: date-time
+        duracaoMinutos:
+          type: integer
+        local:
+          type: string
+        notas:
+          type: string
+        motivoCancelamento:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AgendamentoHistoricoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        agendamentoId:
+          type: string
+          format: uuid
+        estadoAnterior:
+          $ref: '#/components/schemas/EstadoAgendamento'
+        estadoNovo:
+          $ref: '#/components/schemas/EstadoAgendamento'
+        comentario:
+          type: string
+        alteradoPor:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SlotDisponivelResponse:
+      type: object
+      properties:
+        dataHora:
+          type: string
+          format: date-time
+        duracaoMinutos:
+          type: integer
+        tipo:
+          $ref: '#/components/schemas/TipoAgendamento'
+
+    # ── Processo DTOs ─────────────────────────────────────────────────
+    ProcessoCreateRequest:
+      type: object
+      required: [cidadaoId, tipo]
+      properties:
+        cidadaoId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoProcesso'
+        descricao:
+          type: string
+        prioridade:
+          $ref: '#/components/schemas/Prioridade'
+        responsavel:
+          type: string
+        valorTaxa:
+          type: number
+
+    ProcessoUpdateRequest:
+      type: object
+      properties:
+        descricao:
+          type: string
+        prioridade:
+          $ref: '#/components/schemas/Prioridade'
+        responsavel:
+          type: string
+        valorTaxa:
+          type: number
+        taxaPaga:
+          type: boolean
+
+    ProcessoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoProcesso'
+        numeroProcesso:
+          type: string
+        descricao:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoProcesso'
+        prioridade:
+          $ref: '#/components/schemas/Prioridade'
+        responsavel:
+          type: string
+        valorTaxa:
+          type: number
+        taxaPaga:
+          type: boolean
+        dataSubmissao:
+          type: string
+          format: date-time
+        dataConclusao:
+          type: string
+          format: date-time
+        documentoCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProcessoHistoricoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        processoId:
+          type: string
+          format: uuid
+        estadoAnterior:
+          $ref: '#/components/schemas/EstadoProcesso'
+        estadoNovo:
+          $ref: '#/components/schemas/EstadoProcesso'
+        comentario:
+          type: string
+        alteradoPor:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Registo Civil DTOs ────────────────────────────────────────────
+    RegistoCivilCreateRequest:
+      type: object
+      required: [cidadaoId, tipo]
+      properties:
+        cidadaoId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoRegistoCivil'
+        dataEvento:
+          type: string
+          format: date
+        localEvento:
+          type: string
+          maxLength: 255
+        observacoes:
+          type: string
+        nomePai:
+          type: string
+          maxLength: 255
+        nomeMae:
+          type: string
+          maxLength: 255
+        localNascimento:
+          type: string
+          maxLength: 255
+        nomeConjuge1:
+          type: string
+          maxLength: 255
+        nomeConjuge2:
+          type: string
+          maxLength: 255
+        regimeCasamento:
+          type: string
+          maxLength: 100
+        causaObito:
+          type: string
+        localObito:
+          type: string
+          maxLength: 255
+        dataObito:
+          type: string
+          format: date
+
+    RegistoCivilUpdateRequest:
+      type: object
+      properties:
+        dataEvento:
+          type: string
+          format: date
+        localEvento:
+          type: string
+          maxLength: 255
+        observacoes:
+          type: string
+        responsavel:
+          type: string
+          maxLength: 100
+        nomePai:
+          type: string
+          maxLength: 255
+        nomeMae:
+          type: string
+          maxLength: 255
+        localNascimento:
+          type: string
+          maxLength: 255
+        nomeConjuge1:
+          type: string
+          maxLength: 255
+        nomeConjuge2:
+          type: string
+          maxLength: 255
+        regimeCasamento:
+          type: string
+          maxLength: 100
+        causaObito:
+          type: string
+        localObito:
+          type: string
+          maxLength: 255
+        dataObito:
+          type: string
+          format: date
+
+    RegistoCivilResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoRegistoCivil'
+        numeroRegisto:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoRegistoCivil'
+        dataEvento:
+          type: string
+          format: date
+        localEvento:
+          type: string
+        observacoes:
+          type: string
+        responsavel:
+          type: string
+        motivoRejeicao:
+          type: string
+        dataSubmissao:
+          type: string
+          format: date-time
+        dataVerificacao:
+          type: string
+          format: date-time
+        dataCertificado:
+          type: string
+          format: date-time
+        nomePai:
+          type: string
+        nomeMae:
+          type: string
+        localNascimento:
+          type: string
+        nomeConjuge1:
+          type: string
+        nomeConjuge2:
+          type: string
+        regimeCasamento:
+          type: string
+        causaObito:
+          type: string
+        localObito:
+          type: string
+        dataObito:
+          type: string
+          format: date
+        certificadoUrl:
+          type: string
+        documentoCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RegistoCivilHistoricoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        registoCivilId:
+          type: string
+          format: uuid
+        estadoAnterior:
+          $ref: '#/components/schemas/EstadoRegistoCivil'
+        estadoNovo:
+          $ref: '#/components/schemas/EstadoRegistoCivil'
+        comentario:
+          type: string
+        alteradoPor:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Servico Notarial DTOs ─────────────────────────────────────────
+    ServicoNotarialCreateRequest:
+      type: object
+      required: [cidadaoId, tipo]
+      properties:
+        cidadaoId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: '#/components/schemas/TipoServicoNotarial'
+        descricao:
+          type: string
+        observacoes:
+          type: string
+        agendamentoId:
+          type: string
+          format: uuid
+        outorgante:
+          type: string
+          maxLength: 255
+        outorgado:
+          type: string
+          maxLength: 255
+        finalidadeProcuracao:
+          type: string
+        documentoOrigem:
+          type: string
+          maxLength: 255
+        paisOrigem:
+          type: string
+          maxLength: 100
+        entidadeEmissora:
+          type: string
+          maxLength: 255
+        documentoApostilado:
+          type: string
+          maxLength: 255
+        paisDestino:
+          type: string
+          maxLength: 100
+        documentoOriginalRef:
+          type: string
+          maxLength: 255
+        numeroCopias:
+          type: integer
+
+    ServicoNotarialUpdateRequest:
+      type: object
+      properties:
+        descricao:
+          type: string
+        observacoes:
+          type: string
+        responsavel:
+          type: string
+          maxLength: 100
+        outorgante:
+          type: string
+          maxLength: 255
+        outorgado:
+          type: string
+          maxLength: 255
+        finalidadeProcuracao:
+          type: string
+        documentoOrigem:
+          type: string
+          maxLength: 255
+        paisOrigem:
+          type: string
+          maxLength: 100
+        entidadeEmissora:
+          type: string
+          maxLength: 255
+        documentoApostilado:
+          type: string
+          maxLength: 255
+        paisDestino:
+          type: string
+          maxLength: 100
+        documentoOriginalRef:
+          type: string
+          maxLength: 255
+        numeroCopias:
+          type: integer
+
+    ServicoNotarialResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        cidadaoNome:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoServicoNotarial'
+        numeroServico:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoServicoNotarial'
+        descricao:
+          type: string
+        observacoes:
+          type: string
+        responsavel:
+          type: string
+        motivoRejeicao:
+          type: string
+        valorTaxa:
+          type: number
+        taxaPaga:
+          type: boolean
+        dataSubmissao:
+          type: string
+          format: date-time
+        dataConclusao:
+          type: string
+          format: date-time
+        outorgante:
+          type: string
+        outorgado:
+          type: string
+        finalidadeProcuracao:
+          type: string
+        documentoOrigem:
+          type: string
+        paisOrigem:
+          type: string
+        entidadeEmissora:
+          type: string
+        documentoApostilado:
+          type: string
+        paisDestino:
+          type: string
+        documentoOriginalRef:
+          type: string
+        numeroCopias:
+          type: integer
+        certificadoUrl:
+          type: string
+        agendamentoId:
+          type: string
+          format: uuid
+        documentoCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ServicoNotarialHistoricoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        servicoNotarialId:
+          type: string
+          format: uuid
+        estadoAnterior:
+          $ref: '#/components/schemas/EstadoServicoNotarial'
+        estadoNovo:
+          $ref: '#/components/schemas/EstadoServicoNotarial'
+        comentario:
+          type: string
+        alteradoPor:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    NotarialFeeResponse:
+      type: object
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoServicoNotarial'
+        valor:
+          type: number
+        moeda:
+          type: string
+        isento:
+          type: boolean
+
+    # ── Notification DTOs ─────────────────────────────────────────────
+    NotificationPreferenceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        workflowName:
+          type: string
+        emailEnabled:
+          type: boolean
+
+    NotificationPreferenceUpdateRequest:
+      type: object
+      required: [preferences]
+      properties:
+        preferences:
+          type: array
+          items:
+            type: object
+            required: [workflowName, emailEnabled]
+            properties:
+              workflowName:
+                type: string
+              emailEnabled:
+                type: boolean
+
+    NotificationLogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cidadaoId:
+          type: string
+          format: uuid
+        toAddress:
+          type: string
+        subject:
+          type: string
+        template:
+          type: string
+        workflowName:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+        estado:
+          $ref: '#/components/schemas/EstadoNotificacao'
+        errorMessage:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Relatorio DTOs ────────────────────────────────────────────────
+    ModuloResumo:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        porEstado:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        porTipo:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+
+    DashboardResumoResponse:
+      type: object
+      properties:
+        visas:
+          $ref: '#/components/schemas/ModuloResumo'
+        processos:
+          $ref: '#/components/schemas/ModuloResumo'
+        registosCivis:
+          $ref: '#/components/schemas/ModuloResumo'
+        servicosNotariais:
+          $ref: '#/components/schemas/ModuloResumo'
+        agendamentos:
+          $ref: '#/components/schemas/ModuloResumo'
+        totalGeral:
+          type: integer
+          format: int64
+
+    EstatisticasResponse:
+      type: object
+      properties:
+        modulo:
+          type: string
+        total:
+          type: integer
+          format: int64
+        porEstado:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        porTipo:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        periodo:
+          type: string
+
+    AuditEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        entityType:
+          type: string
+        entityId:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        details:
+          type: string
+        ipAddress:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    PagedAuditEventResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEventResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    # ── Wrapped Response Types ────────────────────────────────────────
+    ApiResponseCidadaoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CidadaoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedCidadaoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CidadaoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseDocumentoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/DocumentoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedDocumentoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DocumentoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseDocumentoUploadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/DocumentoUploadResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListDocumentoVersionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentoVersionResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseVisaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/VisaResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedVisaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/VisaResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedVisaHistoricoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/VisaHistoricoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseVisaFeeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/VisaFeeResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseVisaChecklistResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/VisaChecklistResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseAgendamentoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/AgendamentoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedAgendamentoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AgendamentoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedAgendamentoHistoricoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AgendamentoHistoricoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListSlotDisponivelResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlotDisponivelResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseProcessoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ProcessoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedProcessoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProcessoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedProcessoHistoricoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ProcessoHistoricoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseRegistoCivilResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/RegistoCivilResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedRegistoCivilResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RegistoCivilResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedRegistoCivilHistoricoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RegistoCivilHistoricoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseServicoNotarialResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ServicoNotarialResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedServicoNotarialResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ServicoNotarialResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedServicoNotarialHistoricoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ServicoNotarialHistoricoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseNotarialFeeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/NotarialFeeResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListNotificationPreferenceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationPreferenceResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedNotificationLogResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/NotificationLogResponse'
+        timestamp:
+          type: string
+          format: date-time

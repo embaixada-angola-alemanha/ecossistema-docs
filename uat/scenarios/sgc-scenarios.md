@@ -1,7 +1,7 @@
 # UAT Scenarios — SGC (Gestão Consular)
 
 ## Tester Role: Funcionário Consular, Consul
-## System: https://staging-sgc.embaixada-angola.de
+## System: https://staging-sgc.embaixada-angola.site
 
 ---
 

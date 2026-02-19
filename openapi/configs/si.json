@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi-generator.tech/docs/configuration",
   "generatorName": "typescript-angular",
-  "inputSpec": "../specs/si-openapi.json",
+  "inputSpec": "../specs/si-api.yaml",
   "outputDir": "../generated/si-client",
   "additionalProperties": {
     "npmName": "@ecossistema/si-client",

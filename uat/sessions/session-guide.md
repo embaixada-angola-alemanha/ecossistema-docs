@@ -15,14 +15,14 @@
 ```bash
 # Quick health check for all systems
 for URL in \
-  "https://staging-sgc.embaixada-angola.de" \
-  "https://staging-si.embaixada-angola.de" \
-  "https://staging-wn.embaixada-angola.de" \
-  "https://staging-gpj.embaixada-angola.de" \
-  "https://staging-sgc.embaixada-angola.de/api/actuator/health" \
-  "https://staging-si.embaixada-angola.de/api/actuator/health" \
-  "https://staging-wn.embaixada-angola.de/api/actuator/health" \
-  "https://staging-gpj.embaixada-angola.de/api/actuator/health"; do
+  "https://staging-sgc.embaixada-angola.site" \
+  "https://staging-si.embaixada-angola.site" \
+  "https://staging-wn.embaixada-angola.site" \
+  "https://staging-gpj.embaixada-angola.site" \
+  "https://staging-sgc.embaixada-angola.site/api/actuator/health" \
+  "https://staging-si.embaixada-angola.site/api/actuator/health" \
+  "https://staging-wn.embaixada-angola.site/api/actuator/health" \
+  "https://staging-gpj.embaixada-angola.site/api/actuator/health"; do
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
   echo "$URL → HTTP $STATUS"
 done

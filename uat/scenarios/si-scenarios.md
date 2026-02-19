@@ -1,7 +1,7 @@
 # UAT Scenarios — SI (Site Institucional)
 
 ## Tester Role: Assessor de Comunicação, Consul
-## System: https://staging-si.embaixada-angola.de
+## System: https://staging-si.embaixada-angola.site
 
 ---
 

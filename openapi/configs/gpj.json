@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi-generator.tech/docs/configuration",
   "generatorName": "typescript-angular",
-  "inputSpec": "../specs/gpj-openapi.json",
+  "inputSpec": "../specs/gop-api.yaml",
   "outputDir": "../generated/gpj-client",
   "additionalProperties": {
     "npmName": "@ecossistema/gpj-client",

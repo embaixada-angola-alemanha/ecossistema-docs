@@ -1,7 +1,7 @@
 # UAT Scenarios — WN (Web Notícias)
 
 ## Tester Role: Assessor de Comunicação
-## System: https://staging-wn.embaixada-angola.de
+## System: https://staging-wn.embaixada-angola.site
 
 ---
 

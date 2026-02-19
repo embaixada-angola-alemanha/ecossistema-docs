@@ -1,0 +1,1926 @@
+openapi: "3.0.3"
+info:
+  title: WN API - Web News
+  description: |
+    API do portal de noticias da Embaixada de Angola na Alemanha.
+    Gere artigos multilinguais, categorias, tags, autores, workflow editorial
+    com comentarios e versionamento, media library, newsletter, feeds RSS/Atom
+    e partilha social.
+  version: "0.1.0"
+  contact:
+    name: Ecossistema Digital - Embaixada de Angola
+    email: dev@embaixada-angola.de
+
+servers:
+  - url: http://localhost:8083
+    description: Development
+  - url: https://staging-wn.embaixada-angola.de
+    description: Staging
+  - url: https://wn.embaixada-angola.de
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Articles
+    description: Article CRUD management (authenticated)
+  - name: Categories
+    description: Category management
+  - name: Tags
+    description: Tag management
+  - name: Authors
+    description: Author management
+  - name: Editorial
+    description: Editorial workflow, versioning, scheduling, and comments
+  - name: Media
+    description: Media library management
+  - name: Newsletter
+    description: Newsletter subscription management
+  - name: Public Articles
+    description: Public-facing article API (no authentication required)
+  - name: Feed
+    description: RSS and Atom feeds (no authentication required)
+
+paths:
+  # ── Articles (authenticated) ──────────────────────────────────────────
+  /api/v1/articles:
+    post:
+      tags: [Articles]
+      operationId: createArticle
+      summary: Create article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleCreateRequest'
+      responses:
+        '201':
+          description: Article created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+    get:
+      tags: [Articles]
+      operationId: listArticles
+      summary: List articles
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoArtigo'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Articles listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/articles/{id}:
+    get:
+      tags: [Articles]
+      operationId: getArticleById
+      summary: Get article by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Article found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+    put:
+      tags: [Articles]
+      operationId: updateArticle
+      summary: Update article
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleCreateRequest'
+      responses:
+        '200':
+          description: Article updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+    delete:
+      tags: [Articles]
+      operationId: deleteArticle
+      summary: Delete article
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Article deleted
+
+  /api/v1/articles/{id}/estado:
+    patch:
+      tags: [Articles]
+      operationId: updateArticleEstado
+      summary: Update article status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: estado
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/EstadoArtigo'
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/articles/editorial:
+    get:
+      tags: [Articles]
+      operationId: listEditorialArticles
+      summary: List editorial articles
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Editorial articles listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  # ── Categories ────────────────────────────────────────────────────────
+  /api/v1/categories:
+    post:
+      tags: [Categories]
+      operationId: createCategory
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategoryResponse'
+    get:
+      tags: [Categories]
+      operationId: listCategories
+      summary: List all categories
+      responses:
+        '200':
+          description: Categories listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListCategoryResponse'
+
+  /api/v1/categories/{id}:
+    get:
+      tags: [Categories]
+      operationId: getCategoryById
+      summary: Get category by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Category found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategoryResponse'
+    put:
+      tags: [Categories]
+      operationId: updateCategory
+      summary: Update category
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategoryResponse'
+    delete:
+      tags: [Categories]
+      operationId: deleteCategory
+      summary: Delete category
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Category deleted
+
+  /api/v1/categories/{id}/toggle-active:
+    patch:
+      tags: [Categories]
+      operationId: toggleCategoryActive
+      summary: Toggle category active status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCategoryResponse'
+
+  # ── Tags ──────────────────────────────────────────────────────────────
+  /api/v1/tags:
+    post:
+      tags: [Tags]
+      operationId: createTag
+      summary: Create tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreateRequest'
+      responses:
+        '201':
+          description: Tag created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTagResponse'
+    get:
+      tags: [Tags]
+      operationId: listTags
+      summary: List all tags
+      responses:
+        '200':
+          description: Tags listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListTagResponse'
+
+  /api/v1/tags/{id}:
+    get:
+      tags: [Tags]
+      operationId: getTagById
+      summary: Get tag by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Tag found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTagResponse'
+    put:
+      tags: [Tags]
+      operationId: updateTag
+      summary: Update tag
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreateRequest'
+      responses:
+        '200':
+          description: Tag updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTagResponse'
+    delete:
+      tags: [Tags]
+      operationId: deleteTag
+      summary: Delete tag
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Tag deleted
+
+  # ── Authors ───────────────────────────────────────────────────────────
+  /api/v1/authors:
+    post:
+      tags: [Authors]
+      operationId: createAuthor
+      summary: Create author
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorCreateRequest'
+      responses:
+        '201':
+          description: Author created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthorResponse'
+    get:
+      tags: [Authors]
+      operationId: listAuthors
+      summary: List all authors
+      responses:
+        '200':
+          description: Authors listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListAuthorResponse'
+
+  /api/v1/authors/{id}:
+    get:
+      tags: [Authors]
+      operationId: getAuthorById
+      summary: Get author by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Author found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthorResponse'
+    put:
+      tags: [Authors]
+      operationId: updateAuthor
+      summary: Update author
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorCreateRequest'
+      responses:
+        '200':
+          description: Author updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthorResponse'
+    delete:
+      tags: [Authors]
+      operationId: deleteAuthor
+      summary: Delete author
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Author deleted
+
+  /api/v1/authors/active:
+    get:
+      tags: [Authors]
+      operationId: listActiveAuthors
+      summary: List active authors
+      responses:
+        '200':
+          description: Active authors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListAuthorResponse'
+
+  /api/v1/authors/keycloak/{keycloakId}:
+    get:
+      tags: [Authors]
+      operationId: getAuthorByKeycloakId
+      summary: Get author by Keycloak ID
+      parameters:
+        - name: keycloakId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Author found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthorResponse'
+
+  /api/v1/authors/{id}/toggle-active:
+    patch:
+      tags: [Authors]
+      operationId: toggleAuthorActive
+      summary: Toggle author active status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthorResponse'
+
+  # ── Editorial ─────────────────────────────────────────────────────────
+  /api/v1/editorial/articles/{id}/submit:
+    patch:
+      tags: [Editorial]
+      operationId: submitArticle
+      summary: Submit article for review
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/review:
+    patch:
+      tags: [Editorial]
+      operationId: startArticleReview
+      summary: Start article review
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: In review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/publish:
+    patch:
+      tags: [Editorial]
+      operationId: publishArticle
+      summary: Publish article
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/reject:
+    patch:
+      tags: [Editorial]
+      operationId: rejectArticle
+      summary: Reject article (back to draft)
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/archive:
+    patch:
+      tags: [Editorial]
+      operationId: archiveArticle
+      summary: Archive article
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/schedule:
+    patch:
+      tags: [Editorial]
+      operationId: scheduleArticle
+      summary: Schedule article publication
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleRequest'
+      responses:
+        '200':
+          description: Scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+    delete:
+      tags: [Editorial]
+      operationId: cancelArticleSchedule
+      summary: Cancel scheduled publication
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Schedule cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/editorial/articles/{id}/versions:
+    get:
+      tags: [Editorial]
+      operationId: listArticleVersions
+      summary: List article versions
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Versions listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListArticleVersionResponse'
+    post:
+      tags: [Editorial]
+      operationId: createArticleVersion
+      summary: Create version snapshot
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: summary
+          in: query
+          schema:
+            type: string
+        - name: createdBy
+          in: query
+          schema:
+            type: string
+            default: manual
+      responses:
+        '201':
+          description: Version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleVersionResponse'
+
+  /api/v1/editorial/articles/{id}/versions/{version}:
+    get:
+      tags: [Editorial]
+      operationId: getArticleVersion
+      summary: Get specific article version
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Version found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleVersionResponse'
+
+  /api/v1/editorial/articles/{id}/versions/{version}/restore:
+    post:
+      tags: [Editorial]
+      operationId: restoreArticleVersion
+      summary: Restore article to a specific version
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Version restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapStringString'
+
+  /api/v1/editorial/articles/{id}/comments:
+    get:
+      tags: [Editorial]
+      operationId: listArticleComments
+      summary: List article comments
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Comments listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListCommentResponse'
+    post:
+      tags: [Editorial]
+      operationId: addArticleComment
+      summary: Add comment to article
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+      responses:
+        '201':
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCommentResponse'
+
+  /api/v1/editorial/articles/{id}/comments/unresolved:
+    get:
+      tags: [Editorial]
+      operationId: listUnresolvedComments
+      summary: List unresolved comments
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Unresolved comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListCommentResponse'
+
+  /api/v1/editorial/comments/{commentId}/resolve:
+    patch:
+      tags: [Editorial]
+      operationId: resolveComment
+      summary: Resolve comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Comment resolved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCommentResponse'
+
+  /api/v1/editorial/comments/{commentId}:
+    delete:
+      tags: [Editorial]
+      operationId: deleteComment
+      summary: Delete comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Comment deleted
+
+  # ── Media ─────────────────────────────────────────────────────────────
+  /api/v1/media:
+    post:
+      tags: [Media]
+      operationId: uploadMedia
+      summary: Upload media file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                altPt:
+                  type: string
+                altEn:
+                  type: string
+                altDe:
+                  type: string
+              required: [file]
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMediaFileResponse'
+    get:
+      tags: [Media]
+      operationId: listMedia
+      summary: List media files
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Media listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedMediaFileResponse'
+
+  /api/v1/media/resize:
+    post:
+      tags: [Media]
+      operationId: uploadResizedMedia
+      summary: Upload and resize media file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                maxWidth:
+                  type: integer
+                  default: 1200
+                maxHeight:
+                  type: integer
+                  default: 800
+                altPt:
+                  type: string
+                altEn:
+                  type: string
+                altDe:
+                  type: string
+              required: [file]
+      responses:
+        '201':
+          description: File uploaded and resized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMediaFileResponse'
+
+  /api/v1/media/{id}:
+    get:
+      tags: [Media]
+      operationId: getMediaById
+      summary: Get media metadata
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Media found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMediaFileResponse'
+    delete:
+      tags: [Media]
+      operationId: deleteMedia
+      summary: Delete media file
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Media deleted
+
+  /api/v1/media/{id}/download:
+    get:
+      tags: [Media]
+      operationId: downloadMedia
+      summary: Download media file
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: File downloaded
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  # ── Newsletter ────────────────────────────────────────────────────────
+  /api/v1/public/newsletter/subscribe:
+    post:
+      tags: [Newsletter]
+      operationId: subscribeNewsletter
+      summary: Subscribe to newsletter
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsletterSubscribeRequest'
+      responses:
+        '201':
+          description: Subscribed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseNewsletterSubscriberResponse'
+
+  /api/v1/public/newsletter/confirm:
+    get:
+      tags: [Newsletter]
+      operationId: confirmNewsletterSubscription
+      summary: Confirm newsletter subscription
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapStringString'
+
+  /api/v1/public/newsletter/unsubscribe:
+    post:
+      tags: [Newsletter]
+      operationId: unsubscribeNewsletter
+      summary: Unsubscribe from newsletter
+      security: []
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unsubscribed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapStringString'
+
+  /api/v1/newsletter/subscribers:
+    get:
+      tags: [Newsletter]
+      operationId: listNewsletterSubscribers
+      summary: List active subscribers (admin)
+      responses:
+        '200':
+          description: Subscribers listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListNewsletterSubscriberResponse'
+
+  /api/v1/newsletter/subscribers/count:
+    get:
+      tags: [Newsletter]
+      operationId: countNewsletterSubscribers
+      summary: Count active subscribers
+      responses:
+        '200':
+          description: Count returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMapStringLong'
+
+  /api/v1/newsletter/subscribers/{id}:
+    delete:
+      tags: [Newsletter]
+      operationId: deleteNewsletterSubscriber
+      summary: Delete subscriber (admin)
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Subscriber deleted
+
+  # ── Public Articles ───────────────────────────────────────────────────
+  /api/v1/public/articles:
+    get:
+      tags: [Public Articles]
+      operationId: listPublishedArticles
+      summary: List published articles
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Published articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/public/articles/{slug}:
+    get:
+      tags: [Public Articles]
+      operationId: getArticleBySlug
+      summary: Get published article by slug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Article found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseArticleResponse'
+
+  /api/v1/public/articles/featured:
+    get:
+      tags: [Public Articles]
+      operationId: listFeaturedArticles
+      summary: List featured articles
+      security: []
+      responses:
+        '200':
+          description: Featured articles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListArticleResponse'
+
+  /api/v1/public/articles/category/{categoryId}:
+    get:
+      tags: [Public Articles]
+      operationId: listArticlesByCategory
+      summary: List articles by category
+      security: []
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Articles by category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/public/articles/tag/{tagId}:
+    get:
+      tags: [Public Articles]
+      operationId: listArticlesByTag
+      summary: List articles by tag
+      security: []
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Articles by tag
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/public/articles/author/{authorId}:
+    get:
+      tags: [Public Articles]
+      operationId: listArticlesByAuthor
+      summary: List articles by author
+      security: []
+      parameters:
+        - name: authorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Articles by author
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/public/articles/search:
+    get:
+      tags: [Public Articles]
+      operationId: searchArticles
+      summary: Search articles
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedArticleResponse'
+
+  /api/v1/public/articles/categories:
+    get:
+      tags: [Public Articles]
+      operationId: listActiveCategories
+      summary: List active categories (public)
+      security: []
+      responses:
+        '200':
+          description: Active categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListCategoryResponse'
+
+  /api/v1/public/articles/tags:
+    get:
+      tags: [Public Articles]
+      operationId: listAllTagsPublic
+      summary: List all tags (public)
+      security: []
+      responses:
+        '200':
+          description: All tags
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListTagResponse'
+
+  /api/v1/public/articles/{slug}/share:
+    get:
+      tags: [Public Articles]
+      operationId: getShareLinks
+      summary: Get social share links for article
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Share links
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseShareResponse'
+
+  # ── Feed ──────────────────────────────────────────────────────────────
+  /api/v1/feed/rss:
+    get:
+      tags: [Feed]
+      operationId: getRssFeed
+      summary: RSS feed
+      security: []
+      responses:
+        '200':
+          description: RSS feed
+          content:
+            application/rss+xml:
+              schema:
+                type: string
+
+  /api/v1/feed/atom:
+    get:
+      tags: [Feed]
+      operationId: getAtomFeed
+      summary: Atom feed
+      security: []
+      responses:
+        '200':
+          description: Atom feed
+          content:
+            application/atom+xml:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak OAuth2 JWT token
+
+  parameters:
+    idPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 0
+    size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        default: 20
+    sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    # ── Enums ─────────────────────────────────────────────────────────
+    EstadoArtigo:
+      type: string
+      enum: [DRAFT, SUBMITTED, IN_REVIEW, PUBLISHED, ARCHIVED]
+
+    # ── Common ────────────────────────────────────────────────────────
+    PagedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: {}
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    # ── Article DTOs ──────────────────────────────────────────────────
+    ArticleCreateRequest:
+      type: object
+      required: [slug, tituloPt]
+      properties:
+        slug:
+          type: string
+        tituloPt:
+          type: string
+        tituloEn:
+          type: string
+        tituloDe:
+          type: string
+        tituloCs:
+          type: string
+        conteudoPt:
+          type: string
+        conteudoEn:
+          type: string
+        conteudoDe:
+          type: string
+        conteudoCs:
+          type: string
+        excertoPt:
+          type: string
+        excertoEn:
+          type: string
+        excertoDe:
+          type: string
+        metaTituloPt:
+          type: string
+        metaDescricaoPt:
+          type: string
+        metaKeywords:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          uniqueItems: true
+        featuredImageId:
+          type: string
+          format: uuid
+        featured:
+          type: boolean
+
+    ArticleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        tituloPt:
+          type: string
+        tituloEn:
+          type: string
+        tituloDe:
+          type: string
+        tituloCs:
+          type: string
+        conteudoPt:
+          type: string
+        conteudoEn:
+          type: string
+        conteudoDe:
+          type: string
+        conteudoCs:
+          type: string
+        excertoPt:
+          type: string
+        excertoEn:
+          type: string
+        excertoDe:
+          type: string
+        metaTituloPt:
+          type: string
+        metaDescricaoPt:
+          type: string
+        metaKeywords:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoArtigo'
+        category:
+          $ref: '#/components/schemas/CategoryResponse'
+        author:
+          $ref: '#/components/schemas/AuthorResponse'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagResponse'
+          uniqueItems: true
+        featuredImageId:
+          type: string
+          format: uuid
+        featured:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+        scheduledAt:
+          type: string
+          format: date-time
+        viewCount:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ArticleVersionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        articleId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          format: int64
+        tituloPt:
+          type: string
+        conteudoPt:
+          type: string
+        conteudoEn:
+          type: string
+        conteudoDe:
+          type: string
+        excertoPt:
+          type: string
+        changeSummary:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ScheduleRequest:
+      type: object
+      required: [scheduledAt]
+      properties:
+        scheduledAt:
+          type: string
+          format: date-time
+
+    # ── Category DTOs ─────────────────────────────────────────────────
+    CategoryCreateRequest:
+      type: object
+      required: [slug, nomePt]
+      properties:
+        slug:
+          type: string
+        nomePt:
+          type: string
+        nomeEn:
+          type: string
+        nomeDe:
+          type: string
+        nomeCs:
+          type: string
+        descricaoPt:
+          type: string
+        descricaoEn:
+          type: string
+        descricaoDe:
+          type: string
+        cor:
+          type: string
+        sortOrder:
+          type: integer
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        nomePt:
+          type: string
+        nomeEn:
+          type: string
+        nomeDe:
+          type: string
+        nomeCs:
+          type: string
+        descricaoPt:
+          type: string
+        descricaoEn:
+          type: string
+        descricaoDe:
+          type: string
+        cor:
+          type: string
+        sortOrder:
+          type: integer
+        activo:
+          type: boolean
+
+    # ── Tag DTOs ──────────────────────────────────────────────────────
+    TagCreateRequest:
+      type: object
+      required: [slug, nomePt]
+      properties:
+        slug:
+          type: string
+        nomePt:
+          type: string
+        nomeEn:
+          type: string
+        nomeDe:
+          type: string
+
+    TagResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        nomePt:
+          type: string
+        nomeEn:
+          type: string
+        nomeDe:
+          type: string
+
+    # ── Author DTOs ───────────────────────────────────────────────────
+    AuthorCreateRequest:
+      type: object
+      required: [nome]
+      properties:
+        nome:
+          type: string
+        slug:
+          type: string
+        bioPt:
+          type: string
+        bioEn:
+          type: string
+        bioDe:
+          type: string
+        email:
+          type: string
+        avatarId:
+          type: string
+          format: uuid
+        keycloakId:
+          type: string
+        role:
+          type: string
+
+    AuthorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        slug:
+          type: string
+        bioPt:
+          type: string
+        bioEn:
+          type: string
+        bioDe:
+          type: string
+        email:
+          type: string
+        avatarId:
+          type: string
+          format: uuid
+        role:
+          type: string
+        activo:
+          type: boolean
+
+    # ── Comment DTOs ──────────────────────────────────────────────────
+    CommentCreateRequest:
+      type: object
+      required: [authorId, conteudo]
+      properties:
+        authorId:
+          type: string
+          format: uuid
+        conteudo:
+          type: string
+        tipo:
+          type: string
+        parentId:
+          type: string
+          format: uuid
+
+    CommentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        articleId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        conteudo:
+          type: string
+        tipo:
+          type: string
+        parentId:
+          type: string
+          format: uuid
+        resolved:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Media DTOs ────────────────────────────────────────────────────
+    MediaFileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        objectKey:
+          type: string
+        altPt:
+          type: string
+        altEn:
+          type: string
+        altDe:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Newsletter DTOs ───────────────────────────────────────────────
+    NewsletterSubscribeRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+        nome:
+          type: string
+        idioma:
+          type: string
+
+    NewsletterSubscriberResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        nome:
+          type: string
+        idioma:
+          type: string
+        activo:
+          type: boolean
+        confirmed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Share DTOs ────────────────────────────────────────────────────
+    ShareResponse:
+      type: object
+      properties:
+        articleUrl:
+          type: string
+        title:
+          type: string
+        shareLinks:
+          type: object
+          additionalProperties:
+            type: string
+
+    # ── Wrapped Response Types ────────────────────────────────────────
+    ApiResponseArticleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ArticleResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedArticleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ArticleResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListArticleResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseCategoryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CategoryResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListCategoryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseTagResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/TagResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListTagResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseAuthorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/AuthorResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListAuthorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseArticleVersionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ArticleVersionResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListArticleVersionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleVersionResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseCommentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CommentResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListCommentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMediaFileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/MediaFileResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedMediaFileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MediaFileResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseNewsletterSubscriberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/NewsletterSubscriberResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListNewsletterSubscriberResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsletterSubscriberResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseShareResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ShareResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMapStringString:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMapStringLong:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        timestamp:
+          type: string
+          format: date-time

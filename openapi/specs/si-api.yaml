@@ -1,0 +1,1873 @@
+openapi: "3.0.3"
+info:
+  title: SI API - Site Institucional
+  description: |
+    API do site institucional da Embaixada de Angola na Alemanha.
+    Gere paginas CMS multilinguais, menus de navegacao, eventos/protocolo,
+    informacoes de contacto, media library, workflow editorial, versionamento
+    e agendamento de publicacoes.
+  version: "0.1.0"
+  contact:
+    name: Ecossistema Digital - Embaixada de Angola
+    email: dev@embaixada-angola.de
+
+servers:
+  - url: http://localhost:8082
+    description: Development
+  - url: https://staging-si.embaixada-angola.de
+    description: Staging
+  - url: https://si.embaixada-angola.de
+    description: Production
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Pages
+    description: CMS Page management
+  - name: Menus
+    description: Navigation menu management
+  - name: Events
+    description: Event / Protocol management
+  - name: Contacts
+    description: Contact information management
+  - name: Media
+    description: Media library management
+  - name: Editorial
+    description: Content management - workflow, versioning, scheduling, templates
+  - name: Public
+    description: Public-facing CMS API (no authentication required)
+  - name: Institutional
+    description: Public institutional content API
+
+paths:
+  # ── Pages ─────────────────────────────────────────────────────────────
+  /api/v1/pages:
+    post:
+      tags: [Pages]
+      operationId: createPage
+      summary: Create page
+      description: Creates a new CMS page with multilingual translations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageCreateRequest'
+      responses:
+        '201':
+          description: Page created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+    get:
+      tags: [Pages]
+      operationId: listPages
+      summary: List pages
+      description: List pages with optional filters by type and status
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoPagina'
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoConteudo'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Pages listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedPageResponse'
+
+  /api/v1/pages/{id}:
+    get:
+      tags: [Pages]
+      operationId: getPageById
+      summary: Get page by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Page found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+        '404':
+          description: Page not found
+    put:
+      tags: [Pages]
+      operationId: updatePage
+      summary: Update page
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageUpdateRequest'
+      responses:
+        '200':
+          description: Page updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+    delete:
+      tags: [Pages]
+      operationId: deletePage
+      summary: Delete page
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Page deleted
+
+  /api/v1/pages/slug/{slug}:
+    get:
+      tags: [Pages]
+      operationId: getPageBySlug
+      summary: Get page by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Page found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/pages/{id}/estado:
+    patch:
+      tags: [Pages]
+      operationId: updatePageEstado
+      summary: Update page status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/pages/search:
+    get:
+      tags: [Pages]
+      operationId: searchPages
+      summary: Search pages
+      description: Full-text search in title and content
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: idioma
+          in: query
+          schema:
+            $ref: '#/components/schemas/Idioma'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListPageResponse'
+
+  # ── Menus ─────────────────────────────────────────────────────────────
+  /api/v1/menus:
+    post:
+      tags: [Menus]
+      operationId: createMenu
+      summary: Create menu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuCreateRequest'
+      responses:
+        '201':
+          description: Menu created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMenuResponse'
+    get:
+      tags: [Menus]
+      operationId: listMenus
+      summary: List all menus
+      responses:
+        '200':
+          description: Menus listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListMenuResponse'
+
+  /api/v1/menus/{id}:
+    get:
+      tags: [Menus]
+      operationId: getMenuById
+      summary: Get menu by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Menu found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMenuResponse'
+    delete:
+      tags: [Menus]
+      operationId: deleteMenu
+      summary: Delete menu
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Menu deleted
+
+  /api/v1/menus/{id}/items:
+    post:
+      tags: [Menus]
+      operationId: addMenuItem
+      summary: Add menu item
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemCreateRequest'
+      responses:
+        '201':
+          description: Item added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMenuItemResponse'
+
+  /api/v1/menus/{menuId}/items/{itemId}:
+    delete:
+      tags: [Menus]
+      operationId: removeMenuItem
+      summary: Remove menu item
+      parameters:
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Item removed
+
+  /api/v1/menus/{id}/toggle:
+    patch:
+      tags: [Menus]
+      operationId: toggleMenuActive
+      summary: Toggle menu active status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMenuResponse'
+
+  # ── Events ────────────────────────────────────────────────────────────
+  /api/v1/events:
+    post:
+      tags: [Events]
+      operationId: createEvent
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateRequest'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEventResponse'
+    get:
+      tags: [Events]
+      operationId: listEvents
+      summary: List events
+      description: List events with optional status filter
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoConteudo'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: Events listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedEventResponse'
+
+  /api/v1/events/{id}:
+    get:
+      tags: [Events]
+      operationId: getEventById
+      summary: Get event by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEventResponse'
+    put:
+      tags: [Events]
+      operationId: updateEvent
+      summary: Update event
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreateRequest'
+      responses:
+        '200':
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEventResponse'
+    delete:
+      tags: [Events]
+      operationId: deleteEvent
+      summary: Delete event
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Event deleted
+
+  /api/v1/events/{id}/estado:
+    patch:
+      tags: [Events]
+      operationId: updateEventEstado
+      summary: Update event status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+              required: [estado]
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEventResponse'
+
+  # ── Contacts ──────────────────────────────────────────────────────────
+  /api/v1/contacts:
+    post:
+      tags: [Contacts]
+      operationId: createContact
+      summary: Create contact info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInfoCreateRequest'
+      responses:
+        '201':
+          description: Contact created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContactInfoResponse'
+    get:
+      tags: [Contacts]
+      operationId: listContacts
+      summary: List all contacts
+      responses:
+        '200':
+          description: Contacts listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListContactInfoResponse'
+
+  /api/v1/contacts/{id}:
+    get:
+      tags: [Contacts]
+      operationId: getContactById
+      summary: Get contact by ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Contact found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContactInfoResponse'
+    put:
+      tags: [Contacts]
+      operationId: updateContact
+      summary: Update contact info
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInfoCreateRequest'
+      responses:
+        '200':
+          description: Contact updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContactInfoResponse'
+    delete:
+      tags: [Contacts]
+      operationId: deleteContact
+      summary: Delete contact info
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Contact deleted
+
+  /api/v1/contacts/{id}/toggle-active:
+    patch:
+      tags: [Contacts]
+      operationId: toggleContactActive
+      summary: Toggle contact active status
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Status toggled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContactInfoResponse'
+
+  # ── Media ─────────────────────────────────────────────────────────────
+  /api/v1/media:
+    post:
+      tags: [Media]
+      operationId: uploadMedia
+      summary: Upload media file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                altPt:
+                  type: string
+                altEn:
+                  type: string
+                altDe:
+                  type: string
+                altCs:
+                  type: string
+              required: [file]
+      responses:
+        '201':
+          description: File uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMediaFileResponse'
+    get:
+      tags: [Media]
+      operationId: listMedia
+      summary: List media files
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoMedia'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Media listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedMediaFileResponse'
+
+  /api/v1/media/{id}:
+    get:
+      tags: [Media]
+      operationId: getMediaById
+      summary: Get media metadata
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Media found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMediaFileResponse'
+    delete:
+      tags: [Media]
+      operationId: deleteMedia
+      summary: Delete media file
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Media deleted
+
+  /api/v1/media/{id}/download:
+    get:
+      tags: [Media]
+      operationId: downloadMedia
+      summary: Download media file
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: File downloaded
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  # ── Editorial ─────────────────────────────────────────────────────────
+  /api/v1/editorial/pages/{id}/submit-review:
+    post:
+      tags: [Editorial]
+      operationId: submitPageForReview
+      summary: Submit page for review
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/editorial/pages/{id}/publish:
+    post:
+      tags: [Editorial]
+      operationId: publishPage
+      summary: Publish page
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/editorial/pages/{id}/unpublish:
+    post:
+      tags: [Editorial]
+      operationId: unpublishPage
+      summary: Unpublish page (back to draft)
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Unpublished
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/editorial/pages/{id}/archive:
+    post:
+      tags: [Editorial]
+      operationId: archivePage
+      summary: Archive page
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/editorial/pages/{id}/versions:
+    post:
+      tags: [Editorial]
+      operationId: createPageVersionSnapshot
+      summary: Create version snapshot
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: idioma
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Idioma'
+        - name: summary
+          in: query
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Snapshot created
+    get:
+      tags: [Editorial]
+      operationId: listPageVersions
+      summary: List page versions
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: idioma
+          in: query
+          schema:
+            $ref: '#/components/schemas/Idioma'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Versions listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListPageVersionResponse'
+
+  /api/v1/editorial/pages/{id}/versions/{versionNumber}/restore:
+    post:
+      tags: [Editorial]
+      operationId: restorePageVersion
+      summary: Restore page to a specific version
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+        - name: versionNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: idioma
+          in: query
+          schema:
+            $ref: '#/components/schemas/Idioma'
+      responses:
+        '200':
+          description: Version restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/v1/editorial/pages/{id}/schedule:
+    post:
+      tags: [Editorial]
+      operationId: schedulePagePublication
+      summary: Schedule page publication
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchedulePublicationRequest'
+      responses:
+        '201':
+          description: Publication scheduled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  /api/v1/editorial/templates:
+    post:
+      tags: [Editorial]
+      operationId: createTemplate
+      summary: Create content template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentTemplateCreateRequest'
+      responses:
+        '201':
+          description: Template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContentTemplateResponse'
+    get:
+      tags: [Editorial]
+      operationId: listTemplates
+      summary: List content templates
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoPagina'
+      responses:
+        '200':
+          description: Templates listed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListContentTemplateResponse'
+
+  /api/v1/editorial/templates/{id}:
+    get:
+      tags: [Editorial]
+      operationId: getTemplateById
+      summary: Get content template
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Template found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContentTemplateResponse'
+    put:
+      tags: [Editorial]
+      operationId: updateTemplate
+      summary: Update content template
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentTemplateCreateRequest'
+      responses:
+        '200':
+          description: Template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseContentTemplateResponse'
+    delete:
+      tags: [Editorial]
+      operationId: deleteTemplate
+      summary: Delete content template (soft)
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '204':
+          description: Template deleted
+
+  # ── Public ────────────────────────────────────────────────────────────
+  /api/v1/public/pages:
+    get:
+      tags: [Public]
+      operationId: listPublishedPages
+      summary: List published pages
+      security: []
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoPagina'
+      responses:
+        '200':
+          description: Published pages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListPageResponse'
+
+  /api/v1/public/pages/{slug}:
+    get:
+      tags: [Public]
+      operationId: getPublishedPageBySlug
+      summary: Get published page by slug
+      security: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Page found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/public/menus/{localizacao}:
+    get:
+      tags: [Public]
+      operationId: getMenuByLocation
+      summary: Get active menu by location
+      security: []
+      parameters:
+        - name: localizacao
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/LocalizacaoMenu'
+      responses:
+        '200':
+          description: Menu found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseMenuResponse'
+
+  # ── Institutional ─────────────────────────────────────────────────────
+  /api/v1/public/institutional/embaixador:
+    get:
+      tags: [Institutional]
+      operationId: getAmbassador
+      summary: Get Ambassador page
+      security: []
+      responses:
+        '200':
+          description: Ambassador page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/public/institutional/sobre-angola:
+    get:
+      tags: [Institutional]
+      operationId: getAboutAngola
+      summary: Get About Angola overview page
+      security: []
+      responses:
+        '200':
+          description: About Angola page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/public/institutional/sobre-angola/{subsection}:
+    get:
+      tags: [Institutional]
+      operationId: getAboutAngolaSubsection
+      summary: Get About Angola subsection
+      description: "Available subsections: presidente, poderes, geografia, historia, demografia, economia, cultura, simbolos"
+      security: []
+      parameters:
+        - name: subsection
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subsection page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/public/institutional/relacoes-bilaterais:
+    get:
+      tags: [Institutional]
+      operationId: getBilateralRelations
+      summary: Get bilateral relations page
+      security: []
+      responses:
+        '200':
+          description: Bilateral relations page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageResponse'
+
+  /api/v1/public/institutional/events:
+    get:
+      tags: [Institutional]
+      operationId: listPublishedEvents
+      summary: List published events
+      security: []
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+      responses:
+        '200':
+          description: Published events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePagedEventResponse'
+
+  /api/v1/public/institutional/events/upcoming:
+    get:
+      tags: [Institutional]
+      operationId: listUpcomingEvents
+      summary: List upcoming events
+      security: []
+      responses:
+        '200':
+          description: Upcoming events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListEventResponse'
+
+  /api/v1/public/institutional/events/calendar:
+    get:
+      tags: [Institutional]
+      operationId: getEventsByDateRange
+      summary: Events by date range
+      security: []
+      parameters:
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Events in range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListEventResponse'
+
+  /api/v1/public/institutional/events/{id}:
+    get:
+      tags: [Institutional]
+      operationId: getPublicEventById
+      summary: Get event detail
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        '200':
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEventResponse'
+
+  /api/v1/public/institutional/contacts:
+    get:
+      tags: [Institutional]
+      operationId: getActiveContacts
+      summary: List active contacts
+      security: []
+      responses:
+        '200':
+          description: Active contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseListContactInfoResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak OAuth2 JWT token
+
+  parameters:
+    idPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 0
+    size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        default: 20
+    sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    # ── Enums ─────────────────────────────────────────────────────────
+    TipoPagina:
+      type: string
+      enum: [INSTITUTIONAL, NEWS, EVENT, SERVICE, FAQ, LANDING]
+    EstadoConteudo:
+      type: string
+      enum: [DRAFT, REVIEW, PUBLISHED, ARCHIVED]
+    Idioma:
+      type: string
+      enum: [PT, EN, DE, CS]
+    LocalizacaoMenu:
+      type: string
+      enum: [HEADER, FOOTER, SIDEBAR]
+    TipoMedia:
+      type: string
+      enum: [IMAGE, DOCUMENT, VIDEO, AUDIO]
+
+    # ── Common ────────────────────────────────────────────────────────
+    ApiResponseError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        data:
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    PagedResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items: {}
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    # ── Page DTOs ─────────────────────────────────────────────────────
+    TranslationRequest:
+      type: object
+      required: [idioma, titulo]
+      properties:
+        idioma:
+          $ref: '#/components/schemas/Idioma'
+        titulo:
+          type: string
+        conteudo:
+          type: string
+        excerto:
+          type: string
+        metaTitulo:
+          type: string
+        metaDescricao:
+          type: string
+        metaKeywords:
+          type: string
+        ogImageUrl:
+          type: string
+
+    TranslationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        idioma:
+          $ref: '#/components/schemas/Idioma'
+        titulo:
+          type: string
+        conteudo:
+          type: string
+        excerto:
+          type: string
+        metaTitulo:
+          type: string
+        metaDescricao:
+          type: string
+        metaKeywords:
+          type: string
+        ogImageUrl:
+          type: string
+
+    PageCreateRequest:
+      type: object
+      required: [slug, tipo, translations]
+      properties:
+        slug:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoPagina'
+        template:
+          type: string
+        sortOrder:
+          type: integer
+        parentId:
+          type: string
+          format: uuid
+        featuredImageId:
+          type: string
+          format: uuid
+        translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationRequest'
+
+    PageUpdateRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoPagina'
+        template:
+          type: string
+        sortOrder:
+          type: integer
+        parentId:
+          type: string
+          format: uuid
+        featuredImageId:
+          type: string
+          format: uuid
+        translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationRequest'
+
+    PageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoPagina'
+        estado:
+          $ref: '#/components/schemas/EstadoConteudo'
+        template:
+          type: string
+        sortOrder:
+          type: integer
+        parentId:
+          type: string
+          format: uuid
+        featuredImageId:
+          type: string
+          format: uuid
+        publishedAt:
+          type: string
+          format: date-time
+        translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PageVersionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pageId:
+          type: string
+          format: uuid
+        idioma:
+          $ref: '#/components/schemas/Idioma'
+        versionNumber:
+          type: integer
+        titulo:
+          type: string
+        conteudo:
+          type: string
+        excerto:
+          type: string
+        metaTitulo:
+          type: string
+        metaDescricao:
+          type: string
+        changeSummary:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SchedulePublicationRequest:
+      type: object
+      required: [scheduledAt]
+      properties:
+        scheduledAt:
+          type: string
+          format: date-time
+
+    # ── Menu DTOs ─────────────────────────────────────────────────────
+    MenuCreateRequest:
+      type: object
+      required: [nome, localizacao]
+      properties:
+        nome:
+          type: string
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoMenu'
+
+    MenuItemCreateRequest:
+      type: object
+      required: [labelPt]
+      properties:
+        labelPt:
+          type: string
+        labelEn:
+          type: string
+        labelDe:
+          type: string
+        labelCs:
+          type: string
+        url:
+          type: string
+        pageId:
+          type: string
+          format: uuid
+        parentId:
+          type: string
+          format: uuid
+        sortOrder:
+          type: integer
+        openNewTab:
+          type: boolean
+        icon:
+          type: string
+
+    MenuItemResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        labelPt:
+          type: string
+        labelEn:
+          type: string
+        labelDe:
+          type: string
+        labelCs:
+          type: string
+        url:
+          type: string
+        pageId:
+          type: string
+          format: uuid
+        parentId:
+          type: string
+          format: uuid
+        sortOrder:
+          type: integer
+        openNewTab:
+          type: boolean
+        icon:
+          type: string
+        activo:
+          type: boolean
+
+    MenuResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoMenu'
+        activo:
+          type: boolean
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Event DTOs ────────────────────────────────────────────────────
+    EventCreateRequest:
+      type: object
+      required: [tituloPt, dataInicio]
+      properties:
+        tituloPt:
+          type: string
+        tituloEn:
+          type: string
+        tituloDe:
+          type: string
+        tituloCs:
+          type: string
+        descricaoPt:
+          type: string
+        descricaoEn:
+          type: string
+        descricaoDe:
+          type: string
+        descricaoCs:
+          type: string
+        localPt:
+          type: string
+        localEn:
+          type: string
+        dataInicio:
+          type: string
+          format: date-time
+        dataFim:
+          type: string
+          format: date-time
+        imageId:
+          type: string
+          format: uuid
+        tipoEvento:
+          type: string
+
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tituloPt:
+          type: string
+        tituloEn:
+          type: string
+        tituloDe:
+          type: string
+        tituloCs:
+          type: string
+        descricaoPt:
+          type: string
+        descricaoEn:
+          type: string
+        descricaoDe:
+          type: string
+        descricaoCs:
+          type: string
+        localPt:
+          type: string
+        localEn:
+          type: string
+        dataInicio:
+          type: string
+          format: date-time
+        dataFim:
+          type: string
+          format: date-time
+        imageId:
+          type: string
+          format: uuid
+        estado:
+          $ref: '#/components/schemas/EstadoConteudo'
+        tipoEvento:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Contact DTOs ──────────────────────────────────────────────────
+    ContactInfoCreateRequest:
+      type: object
+      required: [departamento]
+      properties:
+        departamento:
+          type: string
+        endereco:
+          type: string
+        cidade:
+          type: string
+        codigoPostal:
+          type: string
+        pais:
+          type: string
+        telefone:
+          type: string
+        fax:
+          type: string
+        email:
+          type: string
+        horarioPt:
+          type: string
+        horarioEn:
+          type: string
+        horarioDe:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        sortOrder:
+          type: integer
+
+    ContactInfoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        departamento:
+          type: string
+        endereco:
+          type: string
+        cidade:
+          type: string
+        codigoPostal:
+          type: string
+        pais:
+          type: string
+        telefone:
+          type: string
+        fax:
+          type: string
+        email:
+          type: string
+        horarioPt:
+          type: string
+        horarioEn:
+          type: string
+        horarioDe:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        sortOrder:
+          type: integer
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Media DTOs ────────────────────────────────────────────────────
+    MediaFileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoMedia'
+        size:
+          type: integer
+          format: int64
+        altPt:
+          type: string
+        altEn:
+          type: string
+        altDe:
+          type: string
+        altCs:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── Template DTOs ─────────────────────────────────────────────────
+    ContentTemplateCreateRequest:
+      type: object
+      required: [nome, tipoPagina]
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        tipoPagina:
+          $ref: '#/components/schemas/TipoPagina'
+        templateHtml:
+          type: string
+        schemaJson:
+          type: string
+
+    ContentTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        descricao:
+          type: string
+        tipoPagina:
+          $ref: '#/components/schemas/TipoPagina'
+        templateHtml:
+          type: string
+        schemaJson:
+          type: string
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Wrapped Response Types ────────────────────────────────────────
+    ApiResponseVoid:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/PageResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedPageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PageResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListPageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PageResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMenuResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/MenuResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListMenuResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMenuItemResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/MenuItemResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/EventResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EventResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListEventResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseContactInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ContactInfoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListContactInfoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactInfoResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseMediaFileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/MediaFileResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponsePagedMediaFileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/PagedResponse'
+            - type: object
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MediaFileResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListPageVersionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PageVersionResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseContentTemplateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ContentTemplateResponse'
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponseListContentTemplateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentTemplateResponse'
+        timestamp:
+          type: string
+          format: date-time

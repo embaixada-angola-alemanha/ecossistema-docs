@@ -30,16 +30,16 @@
 
 | Domain | Points To | Service |
 |--------|----------|---------|
-| sgc.embaixada-angola.de | Ingress IP | SGC Frontend |
-| si.embaixada-angola.de | Ingress IP | SI Frontend |
-| wn.embaixada-angola.de | Ingress IP | WN Frontend |
-| gpj.embaixada-angola.de | Ingress IP | GPJ Frontend |
-| api-sgc.embaixada-angola.de | Ingress IP | SGC Backend |
-| api-si.embaixada-angola.de | Ingress IP | SI Backend |
-| api-wn.embaixada-angola.de | Ingress IP | WN Backend |
-| api-gpj.embaixada-angola.de | Ingress IP | GPJ Backend |
-| auth.embaixada-angola.de | Ingress IP | Keycloak |
-| grafana.embaixada-angola.de | Ingress IP | Monitoring |
+| sgc.embaixada-angola.site | Ingress IP | SGC Frontend |
+| si.embaixada-angola.site | Ingress IP | SI Frontend |
+| wn.embaixada-angola.site | Ingress IP | WN Frontend |
+| gpj.embaixada-angola.site | Ingress IP | GPJ Frontend |
+| api-sgc.embaixada-angola.site | Ingress IP | SGC Backend |
+| api-si.embaixada-angola.site | Ingress IP | SI Backend |
+| api-wn.embaixada-angola.site | Ingress IP | WN Backend |
+| api-gpj.embaixada-angola.site | Ingress IP | GPJ Backend |
+| auth.embaixada-angola.site | Ingress IP | Keycloak |
+| grafana.embaixada-angola.site | Ingress IP | Monitoring |
 
 ---
 
@@ -91,7 +91,7 @@ metadata:
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: admin@embaixada-angola.de
+    email: admin@embaixada-angola.site
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
@@ -253,7 +253,7 @@ spec:
         - name: SPRING_DATA_REDIS_HOST
           value: "redis-master.ecossistema-infra.svc"
         - name: KEYCLOAK_ISSUER_URI
-          value: "https://auth.embaixada-angola.de/realms/ecossistema"
+          value: "https://auth.embaixada-angola.site/realms/ecossistema"
         resources:
           requests:
             memory: "512Mi"
@@ -336,17 +336,17 @@ metadata:
 spec:
   tls:
   - hosts:
-    - sgc.embaixada-angola.de
-    - si.embaixada-angola.de
-    - wn.embaixada-angola.de
-    - gpj.embaixada-angola.de
-    - api-sgc.embaixada-angola.de
-    - api-si.embaixada-angola.de
-    - api-wn.embaixada-angola.de
-    - api-gpj.embaixada-angola.de
+    - sgc.embaixada-angola.site
+    - si.embaixada-angola.site
+    - wn.embaixada-angola.site
+    - gpj.embaixada-angola.site
+    - api-sgc.embaixada-angola.site
+    - api-si.embaixada-angola.site
+    - api-wn.embaixada-angola.site
+    - api-gpj.embaixada-angola.site
     secretName: ecossistema-tls
   rules:
-  - host: sgc.embaixada-angola.de
+  - host: sgc.embaixada-angola.site
     http:
       paths:
       - path: /
@@ -356,7 +356,7 @@ spec:
             name: sgc-frontend
             port:
               number: 80
-  - host: api-sgc.embaixada-angola.de
+  - host: api-sgc.embaixada-angola.site
     http:
       paths:
       - path: /
@@ -445,7 +445,7 @@ kubectl get certificates -n ecossistema-prod
 
 # 5. Verify external access
 for DOMAIN in sgc si wn gpj; do
-  curl -sI "https://${DOMAIN}.embaixada-angola.de" | head -1
+  curl -sI "https://${DOMAIN}.embaixada-angola.site" | head -1
 done
 ```
 

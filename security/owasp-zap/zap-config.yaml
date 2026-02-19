@@ -23,7 +23,7 @@ env:
       users:
         - name: "admin"
           credentials:
-            username: "admin@embaixada-angola.de"
+            username: "admin@embaixada-angola.site"
             password: "${ZAP_ADMIN_PASSWORD}"
 
     - name: "SI Backend API"

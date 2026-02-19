@@ -18,8 +18,8 @@
 - [x] Standard flow enabled (Authorization Code + PKCE)
 - [x] Direct access grants: DISABLED
 - [x] Service accounts: DISABLED
-- [x] Valid redirect URIs: `http://localhost:3001/*`, `https://sgc.embaixada-angola.de/*`
-- [x] Web origins: `http://localhost:3001`, `https://sgc.embaixada-angola.de`
+- [x] Valid redirect URIs: `http://localhost:3001/*`, `https://sgc.embaixada-angola.site/*`
+- [x] Web origins: `http://localhost:3001`, `https://sgc.embaixada-angola.site`
 - [x] CORS headers configured
 
 #### gpj-app (Project Management Frontend)

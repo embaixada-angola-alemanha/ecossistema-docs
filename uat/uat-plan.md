@@ -47,12 +47,12 @@
 
 | Component | URL | Notes |
 |-----------|-----|-------|
-| SGC Frontend | https://staging-sgc.embaixada-angola.de | Admin portal |
-| SI Frontend | https://staging-si.embaixada-angola.de | Public website |
-| WN Frontend | https://staging-wn.embaixada-angola.de | News portal |
-| GPJ Frontend | https://staging-gpj.embaixada-angola.de | Project mgmt |
+| SGC Frontend | https://staging-sgc.embaixada-angola.site | Admin portal |
+| SI Frontend | https://staging-si.embaixada-angola.site | Public website |
+| WN Frontend | https://staging-wn.embaixada-angola.site | News portal |
+| GPJ Frontend | https://staging-gpj.embaixada-angola.site | Project mgmt |
 | Mobile App | TestFlight / Firebase App Distribution | iOS + Android |
-| Keycloak | https://staging-auth.embaixada-angola.de | SSO |
+| Keycloak | https://staging-auth.embaixada-angola.site | SSO |
 
 ## 6. Roles & Responsibilities
 

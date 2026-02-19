@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi-generator.tech/docs/configuration",
   "generatorName": "typescript-angular",
-  "inputSpec": "../specs/wn-openapi.json",
+  "inputSpec": "../specs/wn-api.yaml",
   "outputDir": "../generated/wn-client",
   "additionalProperties": {
     "npmName": "@ecossistema/wn-client",

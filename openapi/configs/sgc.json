@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi-generator.tech/docs/configuration",
   "generatorName": "typescript-angular",
-  "inputSpec": "../specs/sgc-openapi.json",
+  "inputSpec": "../specs/sgc-api.yaml",
   "outputDir": "../generated/sgc-client",
   "additionalProperties": {
     "npmName": "@ecossistema/sgc-client",

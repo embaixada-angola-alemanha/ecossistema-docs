@@ -12,7 +12,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
 
 ```bash
 # Client credentials (service-to-service)
-curl -X POST https://auth.embaixada-angola.de/realms/ecossistema/protocol/openid-connect/token \
+curl -X POST https://auth.embaixada-angola.site/realms/ecossistema/protocol/openid-connect/token \
   -d "grant_type=client_credentials" \
   -d "client_id=sgc-app" \
   -d "client_secret=${CLIENT_SECRET}"
