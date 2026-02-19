@@ -1,0 +1,13 @@
+{
+  "name": "@ecossistema/core",
+  "version": "1.0.0",
+  "description": "Core models, interfaces, and utilities shared across all Ecossistema Angular frontends",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "@angular/core": "^18.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "keywords": ["ecossistema", "angular", "core", "shared"],
+  "license": "UNLICENSED"
+}

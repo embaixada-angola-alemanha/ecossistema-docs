@@ -1,0 +1,14 @@
+{
+  "name": "@ecossistema/ui-kit",
+  "version": "1.0.0",
+  "description": "Shared UI components (loading spinner, status badge, workflow stepper, breadcrumbs, pipes) for Ecossistema Angular frontends",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "@angular/core": "^18.0.0",
+    "@angular/material": "^18.0.0",
+    "@ngx-translate/core": "^16.0.0"
+  },
+  "keywords": ["ecossistema", "angular", "ui-kit", "components", "shared"],
+  "license": "UNLICENSED"
+}

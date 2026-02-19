@@ -1,0 +1,145 @@
+name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy-java:
+    name: Trivy Scan (Java ${{ matrix.repo }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [ecossistema-sgc-backend, ecossistema-si-backend, ecossistema-wn-backend, ecossistema-gpj-backend, ecossistema-commons]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: embaixada-angola/${{ matrix.repo }}
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  trivy-node:
+    name: Trivy Scan (Node ${{ matrix.repo }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [ecossistema-sgc-frontend, ecossistema-si-frontend, ecossistema-wn-frontend, ecossistema-gpj-frontend, ecossistema-mobile]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: embaixada-angola/${{ matrix.repo }}
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  trivy-iac:
+    name: Trivy IaC Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: embaixada-angola/ecossistema-infra
+
+      - name: Trivy config scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          severity: 'HIGH,CRITICAL'
+          format: 'sarif'
+          output: 'trivy-iac.sarif'
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-iac.sarif'
+
+  zap-scan:
+    name: OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    needs: [trivy-java]
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ecossistema
+          POSTGRES_PASSWORD: ecossistema
+          POSTGRES_DB: ecossistema
+        ports: ['5432:5432']
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start backends
+        run: |
+          cd ecossistema-sgc-backend && mvn spring-boot:run -Dspring-boot.run.profiles=test &
+          cd ecossistema-si-backend && mvn spring-boot:run -Dspring-boot.run.profiles=test &
+          cd ecossistema-wn-backend && mvn spring-boot:run -Dspring-boot.run.profiles=test &
+          sleep 60
+
+      - name: ZAP API Scan (SGC)
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: 'http://localhost:8081/v3/api-docs'
+          rules_file_name: 'ecossistema-docs/security/owasp-zap/zap-config.yaml'
+          fail_action: true
+
+      - name: ZAP API Scan (SI)
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: 'http://localhost:8082/v3/api-docs'
+
+      - name: ZAP API Scan (WN)
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: 'http://localhost:8083/v3/api-docs'
+
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports
+          path: report_*.html
+          retention-days: 30

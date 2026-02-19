@@ -1,0 +1,14 @@
+{
+  "name": "@ecossistema/i18n",
+  "version": "1.0.0",
+  "description": "Shared internationalization service, pipes, and translation utilities for Ecossistema Angular frontends",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "@angular/core": "^18.0.0",
+    "@ngx-translate/core": "^16.0.0",
+    "@ngx-translate/http-loader": "^16.0.0"
+  },
+  "keywords": ["ecossistema", "angular", "i18n", "translate", "multilingual"],
+  "license": "UNLICENSED"
+}

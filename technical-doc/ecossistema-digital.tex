@@ -1,0 +1,723 @@
+% ============================================================
+% Documentação Técnica — Ecossistema Digital
+% Embaixada da República de Angola na Alemanha
+% ============================================================
+\documentclass[a4paper,11pt,twoside]{report}
+
+% --- Pacotes ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{pgfgantt}
+
+% --- Cores institucionais ---
+\definecolor{angola-red}{HTML}{CE1126}
+\definecolor{angola-black}{HTML}{000000}
+\definecolor{angola-gold}{HTML}{F9D616}
+\definecolor{code-bg}{HTML}{F5F5F5}
+
+% --- Geometria ---
+\geometry{
+    top=30mm, bottom=25mm, left=30mm, right=25mm, headheight=15mm
+}
+
+% --- Cabeçalho/Rodapé ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\textcolor{angola-red}{Ecossistema Digital}}
+\fancyhead[RO]{\small\textcolor{gray}{\rightmark}}
+\fancyfoot[C]{\thepage}
+\fancyfoot[RE,LO]{\small\textcolor{gray}{Embaixada de Angola — Berlim}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+% --- Títulos ---
+\titleformat{\chapter}[display]
+    {\Huge\bfseries\color{angola-red}}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+    {\Large\bfseries\color{angola-red}}{\thesection}{1em}{}
+\titleformat{\subsection}
+    {\large\bfseries\color{angola-black}}{\thesubsection}{1em}{}
+
+% --- Hyperlinks ---
+\hypersetup{
+    colorlinks=true, linkcolor=angola-red, urlcolor=angola-red,
+    pdftitle={Ecossistema Digital - Documentação Técnica},
+    pdfauthor={Embaixada de Angola na Alemanha}
+}
+
+% --- Código ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true, frame=single,
+    rulecolor=\color{gray}, backgroundcolor=\color{code-bg},
+    keywordstyle=\color{angola-red}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{angola-gold!80!black},
+    numbers=left, numberstyle=\tiny\color{gray},
+    showstringspaces=false
+}
+
+% --- Metadados ---
+\newcommand{\docversao}{1.0}
+\newcommand{\docdata}{Fevereiro 2026}
+
+% ============================================================
+\begin{document}
+
+% --- Página de Rosto ---
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\color{angola-red}\rule{\textwidth}{3pt}}
+    \vspace{1cm}
+
+    {\fontsize{28}{34}\selectfont\bfseries\color{angola-red}
+        Ecossistema Digital\par}
+    \vspace{0.5cm}
+    {\LARGE Documentação Técnica\par}
+    \vspace{1cm}
+    {\Large Embaixada da República de Angola\par}
+    {\large Berlim, Alemanha\par}
+
+    \vspace{2cm}
+
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Versão}      & \docversao \\
+        \textbf{Data}        & \docdata \\
+        \textbf{Classificação} & Interno \\
+        \textbf{Idioma}      & Português \\
+        \bottomrule
+    \end{tabular}
+
+    \vfill
+    {\color{angola-red}\rule{\textwidth}{3pt}}
+    \vspace{0.3cm}
+    {\small\textcolor{gray}{Documento gerado no âmbito do projecto Ecossistema Digital}}
+\end{titlepage}
+
+% --- Controlo de Versões ---
+\thispagestyle{empty}
+\section*{Controlo de Versões}
+\begin{tabularx}{\textwidth}{llXl}
+    \toprule
+    \textbf{Versão} & \textbf{Data} & \textbf{Alterações} & \textbf{Autor} \\
+    \midrule
+    0.1 & 2026-02-16 & Estrutura inicial, infra e GPJ & Equipa Dev \\
+    0.5 & 2026-02-17 & SGC, SI, WN backends e frontends & Equipa Dev \\
+    0.8 & 2026-02-18 & Mobile, integração, testes & Equipa Dev \\
+    1.0 & 2026-02-18 & Versão final para go-live & Equipa Dev \\
+    \bottomrule
+\end{tabularx}
+\newpage
+
+% --- Índice ---
+\tableofcontents
+\newpage
+
+% ============================================================
+\chapter{Introdução}
+% ============================================================
+
+\section{Objectivo}
+
+Este documento constitui a documentação técnica completa do Ecossistema Digital da Embaixada da República de Angola na Alemanha. Destina-se à equipa técnica responsável pela manutenção, evolução e operação dos sistemas.
+
+\section{Âmbito}
+
+O Ecossistema Digital é composto por quatro sistemas principais, uma aplicação móvel e uma camada de infraestrutura partilhada:
+
+\begin{enumerate}
+    \item \textbf{SGC} — Sistema de Gestão Consular (gestão de cidadãos, vistos, agendamentos, documentos)
+    \item \textbf{SI} — Site Institucional (website público da embaixada)
+    \item \textbf{WN} — Web Notícias (portal de notícias)
+    \item \textbf{GPJ} — Gestão de Projectos (gestão interna de sprints e tarefas)
+    \item \textbf{Mobile} — Aplicação React Native (iOS + Android para cidadãos)
+    \item \textbf{Infra} — Infraestrutura partilhada (Kubernetes, CI/CD, monitoring)
+\end{enumerate}
+
+\section{Convenções}
+
+\begin{itemize}
+    \item Código-fonte: \texttt{monospace}
+    \item URLs e endpoints: \texttt{/api/v1/recurso}
+    \item Variáveis de ambiente: \texttt{VARIAVEL\_NOME}
+    \item Referências a ficheiros: \textit{itálico}
+\end{itemize}
+
+\section{Arquitectura Geral}
+
+O ecossistema segue uma arquitectura \textbf{multi-repositório} com backend em Java 21/Spring Boot 3.4, frontends administrativos em Angular 18, e aplicação móvel em React Native 0.76. A autenticação é centralizada via Keycloak com OAuth2/OIDC.
+
+% ============================================================
+\chapter{Stack Tecnológico}
+% ============================================================
+
+\section{Backend}
+
+\begin{tabularx}{\textwidth}{lXl}
+    \toprule
+    \textbf{Componente} & \textbf{Tecnologia} & \textbf{Versão} \\
+    \midrule
+    Runtime & Java (Temurin) & 21 LTS \\
+    Framework & Spring Boot & 3.4.x \\
+    Segurança & Spring Security + OAuth2 & 6.x \\
+    Base de dados & PostgreSQL & 16 \\
+    Migrações & Flyway & 10.x \\
+    Cache & Redis & 7.x \\
+    Mensagens & RabbitMQ & 3.13 \\
+    Ficheiros & MinIO (S3-compatible) & latest \\
+    Build & Maven & 3.9.x \\
+    \bottomrule
+\end{tabularx}
+
+\section{Frontend (Admin)}
+
+\begin{tabularx}{\textwidth}{lXl}
+    \toprule
+    \textbf{Componente} & \textbf{Tecnologia} & \textbf{Versão} \\
+    \midrule
+    Framework & Angular & 18.x \\
+    UI Library & Angular Material & 18.x \\
+    State Management & NgRx (onde aplicável) & 18.x \\
+    Charts & Chart.js + ng2-charts & 4.x \\
+    i18n & @ngx-translate/core & 16.x \\
+    Build & Angular CLI & 18.x \\
+    \bottomrule
+\end{tabularx}
+
+\section{Mobile}
+
+\begin{tabularx}{\textwidth}{lXl}
+    \toprule
+    \textbf{Componente} & \textbf{Tecnologia} & \textbf{Versão} \\
+    \midrule
+    Framework & React Native & 0.76.x \\
+    Navegação & React Navigation & 7.x \\
+    Data Fetching & TanStack React Query & 5.x \\
+    State & Zustand & 5.x \\
+    HTTP & Axios & 1.7.x \\
+    i18n & i18next + react-i18next & 24.x / 15.x \\
+    Push & Firebase Cloud Messaging & latest \\
+    OTA Updates & CodePush & 9.x \\
+    E2E Tests & Detox & 20.x \\
+    \bottomrule
+\end{tabularx}
+
+\section{Infraestrutura}
+
+\begin{tabularx}{\textwidth}{lXl}
+    \toprule
+    \textbf{Componente} & \textbf{Tecnologia} & \textbf{Versão} \\
+    \midrule
+    Containers & Docker & 25.x \\
+    Orquestração & Kubernetes (K3s) & 1.30.x \\
+    CI/CD & GitHub Actions + ArgoCD & latest \\
+    Autenticação & Keycloak & 24.x \\
+    Monitoring & Prometheus + Grafana & latest \\
+    Logs & Loki + Promtail & latest \\
+    Ingress & Traefik & 3.x \\
+    DNS/TLS & Let's Encrypt + cert-manager & latest \\
+    \bottomrule
+\end{tabularx}
+
+% ============================================================
+\chapter{Arquitectura dos Sistemas}
+% ============================================================
+
+\section{Visão Geral}
+
+Cada sistema segue o padrão \textbf{Backend API + Frontend SPA}, comunicando via REST APIs autenticadas por JWT tokens emitidos pelo Keycloak.
+
+\subsection{Comunicação entre Sistemas}
+
+\begin{itemize}
+    \item \textbf{SGC $\leftrightarrow$ SI}: Eventos publicados via RabbitMQ (novo evento consular $\rightarrow$ página SI)
+    \item \textbf{SGC $\leftrightarrow$ WN}: Notificações de serviço $\rightarrow$ artigos WN
+    \item \textbf{SGC $\leftrightarrow$ Mobile}: API REST directa, push via FCM
+    \item \textbf{GPJ}: Monitoriza todos os sistemas via health checks
+\end{itemize}
+
+\section{SGC — Sistema de Gestão Consular}
+
+\subsection{Domínio}
+
+O SGC gere todo o fluxo consular:
+
+\begin{itemize}
+    \item \textbf{Cidadão}: Registo, pesquisa, actualização, desactivação
+    \item \textbf{Visto}: 7 tipos (TURISMO, TRABALHO, ESTUDO, NEGOCIO, TRANSITO, RESIDENCIA, DIPLOMATICO), 9 estados
+    \item \textbf{Agendamento}: 7 tipos, 6 estados, detecção de conflitos, QR check-in
+    \item \textbf{Documento}: Upload/download para MinIO, associado a processo
+    \item \textbf{Notificação}: Sistema interno + push para mobile
+\end{itemize}
+
+\subsection{Portos}
+
+\begin{tabular}{ll}
+    \toprule
+    Backend API & \texttt{:8081} \\
+    Frontend & \texttt{:3001} \\
+    \bottomrule
+\end{tabular}
+
+\subsection{Roles RBAC}
+
+\begin{tabular}{lp{8cm}}
+    \toprule
+    \textbf{Role} & \textbf{Permissões} \\
+    \midrule
+    ADMIN & Acesso total: CRUD cidadãos, vistos, agendamentos, relatórios, configurações \\
+    OFFICER & CRUD cidadãos, vistos, agendamentos (sem configurações) \\
+    VIEWER & Leitura apenas \\
+    \bottomrule
+\end{tabular}
+
+\section{SI — Site Institucional}
+
+\subsection{Domínio}
+
+Website público multilingue (PT/EN/DE) com:
+
+\begin{itemize}
+    \item Páginas estáticas (Embaixador, Serviços, Contactos)
+    \item Eventos (criação, publicação, arquivo)
+    \item Conteúdo gerido por CMS backend
+\end{itemize}
+
+\subsection{Portos}
+
+\begin{tabular}{ll}
+    \toprule
+    Backend API & \texttt{:8082} \\
+    Frontend & \texttt{:3002} \\
+    \bottomrule
+\end{tabular}
+
+\section{WN — Web Notícias}
+
+\subsection{Domínio}
+
+Portal de notícias com:
+
+\begin{itemize}
+    \item Artigos (DRAFT $\rightarrow$ PUBLISHED), categorias, tags
+    \item Pesquisa full-text (PostgreSQL tsvector)
+    \item Feed RSS, partilha social
+    \item Media library (imagens optimizadas)
+\end{itemize}
+
+\subsection{Portos}
+
+\begin{tabular}{ll}
+    \toprule
+    Backend API & \texttt{:8083} \\
+    Frontend & \texttt{:3003} \\
+    \bottomrule
+\end{tabular}
+
+\section{GPJ — Gestão de Projectos}
+
+\subsection{Domínio}
+
+Sistema interno de gestão de projectos:
+
+\begin{itemize}
+    \item Sprints, tarefas (Kanban board), time tracking
+    \item Gráfico de Gantt, velocity chart, burn-down
+    \item Monitorização de saúde de todos os sistemas
+\end{itemize}
+
+\subsection{Portos}
+
+\begin{tabular}{ll}
+    \toprule
+    Backend API & \texttt{:8084} \\
+    Frontend & \texttt{:4200} \\
+    \bottomrule
+\end{tabular}
+
+\section{Mobile}
+
+\subsection{Funcionalidades}
+
+\begin{itemize}
+    \item Autenticação Keycloak via WebView
+    \item Perfil do cidadão + upload de documentos
+    \item Solicitação e tracking de vistos
+    \item Agendamento com QR check-in
+    \item Feed de notícias (WN)
+    \item Push notifications (FCM)
+    \item Modo offline com sync automático
+    \item 4 idiomas: PT, EN, DE, FR
+    \item OTA updates via CodePush
+\end{itemize}
+
+% ============================================================
+\chapter{Base de Dados}
+% ============================================================
+
+\section{Modelo de Dados — SGC}
+
+\subsection{Tabelas Principais}
+
+\begin{longtable}{llp{6cm}}
+    \toprule
+    \textbf{Tabela} & \textbf{Colunas-chave} & \textbf{Descrição} \\
+    \midrule
+    \endhead
+    cidadao & id, nome, email, numero\_passaporte, nif, nacionalidade & Cidadão registado \\
+    visto & id, cidadao\_id, tipo, estado, motivo, data\_entrada, data\_saida & Pedido de visto \\
+    agendamento & id, cidadao\_id, tipo, estado, data\_hora, notas & Marcação consular \\
+    processo & id, cidadao\_id, tipo, estado & Processo consular \\
+    documento & id, processo\_id, nome, path, tipo\_mime, tamanho & Documento carregado \\
+    notificacao & id, cidadao\_id, titulo, mensagem, lida & Notificação interna \\
+    \bottomrule
+\end{longtable}
+
+\subsection{Índices Recomendados}
+
+\begin{lstlisting}[language=SQL]
+CREATE INDEX idx_cidadao_nome ON cidadao (lower(nome));
+CREATE INDEX idx_cidadao_passaporte ON cidadao (numero_passaporte);
+CREATE INDEX idx_processo_cidadao_estado ON processo (cidadao_id, estado);
+CREATE INDEX idx_visto_cidadao_estado ON visto (cidadao_id, estado);
+CREATE INDEX idx_agendamento_datahora ON agendamento (data_hora);
+CREATE INDEX idx_agendamento_conflict ON agendamento (data_hora, tipo, estado)
+    WHERE estado IN ('PENDENTE', 'CONFIRMADO');
+\end{lstlisting}
+
+\section{Modelo de Dados — WN}
+
+\begin{longtable}{llp{6cm}}
+    \toprule
+    \textbf{Tabela} & \textbf{Colunas-chave} & \textbf{Descrição} \\
+    \midrule
+    article & id, slug, titulo, resumo, conteudo, status, published\_at & Artigo de notícia \\
+    category & id, nome, slug & Categoria \\
+    tag & id, nome, slug & Etiqueta \\
+    article\_category & article\_id, category\_id & Relação N:M \\
+    media & id, filename, path, tipo\_mime, tamanho & Ficheiro multimédia \\
+    \bottomrule
+\end{longtable}
+
+\section{Modelo de Dados — SI}
+
+\begin{longtable}{llp{6cm}}
+    \toprule
+    \textbf{Tabela} & \textbf{Colunas-chave} & \textbf{Descrição} \\
+    \midrule
+    page & id, slug, titulo, conteudo, status & Página do site \\
+    event & id, titulo, descricao, start\_date, end\_date, location, status & Evento \\
+    \bottomrule
+\end{longtable}
+
+\section{Modelo de Dados — GPJ}
+
+\begin{longtable}{llp{6cm}}
+    \toprule
+    \textbf{Tabela} & \textbf{Colunas-chave} & \textbf{Descrição} \\
+    \midrule
+    sprint & id, titulo, data\_inicio, data\_fim, estado & Sprint \\
+    task & id, sprint\_id, nome, descricao, estado, assignee\_id, horas & Tarefa \\
+    time\_log & id, task\_id, horas, descricao, logged\_date & Registo de tempo \\
+    \bottomrule
+\end{longtable}
+
+\section{Migrações (Flyway)}
+
+Cada backend mantém migrações em \texttt{src/main/resources/db/migration/} com a convenção:
+
+\begin{lstlisting}
+V{versao}__{descricao}.sql
+Exemplo: V001__create_cidadao_table.sql
+\end{lstlisting}
+
+% ============================================================
+\chapter{API REST}
+% ============================================================
+
+\section{Convenções}
+
+\begin{itemize}
+    \item Base path: \texttt{/api/v1/}
+    \item Autenticação: Bearer JWT token (Keycloak)
+    \item Formato: JSON (UTF-8)
+    \item Paginação: \texttt{?page=0\&size=20\&sort=nome,asc}
+    \item Erros: \texttt{\{error, message, status, timestamp\}}
+\end{itemize}
+
+\section{SGC API — Endpoints Principais}
+
+\begin{longtable}{llp{5cm}}
+    \toprule
+    \textbf{Método} & \textbf{Endpoint} & \textbf{Descrição} \\
+    \midrule
+    \endhead
+    GET & /api/v1/cidadaos & Listar cidadãos (paginado) \\
+    POST & /api/v1/cidadaos & Registar cidadão \\
+    GET & /api/v1/cidadaos/\{id\} & Obter cidadão \\
+    PUT & /api/v1/cidadaos/\{id\} & Actualizar cidadão \\
+    \midrule
+    GET & /api/v1/vistos & Listar vistos \\
+    POST & /api/v1/vistos & Criar pedido de visto \\
+    GET & /api/v1/vistos/\{id\} & Obter visto \\
+    PATCH & /api/v1/vistos/\{id\}/estado & Mudar estado do visto \\
+    GET & /api/v1/vistos/\{id\}/timeline & Timeline do visto \\
+    \midrule
+    GET & /api/v1/agendamentos & Listar agendamentos \\
+    POST & /api/v1/agendamentos & Criar agendamento \\
+    GET & /api/v1/agendamentos/slots & Slots disponíveis \\
+    PATCH & /api/v1/agendamentos/\{id\}/cancelar & Cancelar agendamento \\
+    \midrule
+    POST & /api/v1/documentos & Upload documento \\
+    GET & /api/v1/documentos/\{id\}/download & Download documento \\
+    \midrule
+    GET & /api/v1/actuator/health & Health check \\
+    \bottomrule
+\end{longtable}
+
+\section{SI API — Endpoints Principais}
+
+\begin{longtable}{llp{5cm}}
+    \toprule
+    \textbf{Método} & \textbf{Endpoint} & \textbf{Descrição} \\
+    \midrule
+    GET & /api/v1/public/pages & Listar páginas públicas \\
+    GET & /api/v1/public/pages/\{slug\} & Obter página por slug \\
+    GET & /api/v1/public/events & Listar eventos \\
+    GET & /api/v1/public/events/\{id\} & Obter evento \\
+    POST & /api/v1/admin/pages & Criar página (admin) \\
+    PUT & /api/v1/admin/pages/\{id\} & Editar página (admin) \\
+    POST & /api/v1/admin/events & Criar evento (admin) \\
+    \bottomrule
+\end{longtable}
+
+\section{WN API — Endpoints Principais}
+
+\begin{longtable}{llp{5cm}}
+    \toprule
+    \textbf{Método} & \textbf{Endpoint} & \textbf{Descrição} \\
+    \midrule
+    GET & /api/v1/public/articles & Listar artigos publicados \\
+    GET & /api/v1/public/articles/\{slug\} & Obter artigo por slug \\
+    GET & /api/v1/public/categories & Listar categorias \\
+    GET & /api/v1/public/search?q= & Pesquisa full-text \\
+    POST & /api/v1/admin/articles & Criar artigo (admin) \\
+    PUT & /api/v1/admin/articles/\{id\} & Editar artigo (admin) \\
+    PATCH & /api/v1/admin/articles/\{id\}/publish & Publicar artigo \\
+    \bottomrule
+\end{longtable}
+
+\section{GPJ API — Endpoints Principais}
+
+\begin{longtable}{llp{5cm}}
+    \toprule
+    \textbf{Método} & \textbf{Endpoint} & \textbf{Descrição} \\
+    \midrule
+    GET & /api/v1/sprints & Listar sprints \\
+    POST & /api/v1/sprints & Criar sprint \\
+    GET & /api/v1/sprints/\{id\}/tasks & Tarefas do sprint \\
+    POST & /api/v1/tasks & Criar tarefa \\
+    PATCH & /api/v1/tasks/\{id\}/status & Mudar estado da tarefa \\
+    POST & /api/v1/timelogs & Registar tempo \\
+    GET & /api/v1/dashboard & Dashboard KPIs \\
+    \bottomrule
+\end{longtable}
+
+% ============================================================
+\chapter{Segurança}
+% ============================================================
+
+\section{Autenticação (Keycloak)}
+
+\begin{itemize}
+    \item Realm: \texttt{ecossistema}
+    \item Clients: \texttt{sgc-app}, \texttt{gpj-app}, \texttt{mobile-app}, \texttt{public-web}
+    \item Fluxo: Authorization Code + PKCE
+    \item Token lifetime: Access 5 min, Refresh 30 min
+    \item MFA: Activado para roles ADMIN
+\end{itemize}
+
+\section{RBAC}
+
+Roles são definidos no Keycloak e propagados via JWT claims:
+
+\begin{lstlisting}
+{
+  "realm_access": {
+    "roles": ["sgc-admin", "gpj-viewer"]
+  }
+}
+\end{lstlisting}
+
+\section{Segurança de Dados}
+
+\begin{itemize}
+    \item HTTPS obrigatório (TLS 1.3)
+    \item Dados sensíveis encriptados em repouso (PostgreSQL TDE)
+    \item Passwords nunca armazenadas (delegadas ao Keycloak)
+    \item File uploads validados (tipo MIME, tamanho máximo 10MB)
+    \item CORS restrito aos domínios do ecossistema
+    \item Rate limiting: 100 req/min por IP
+    \item Security headers: CSP, X-Frame-Options, X-Content-Type-Options
+\end{itemize}
+
+\section{GDPR}
+
+\begin{itemize}
+    \item Base legal: Consentimento + Interesse legítimo (Art. 6)
+    \item Dados pessoais inventariados por sistema
+    \item Direito de acesso e exportação implementado
+    \item Direito ao esquecimento: soft-delete com anonimização após 30 dias
+    \item Retenção: dados consulares 10 anos (obrigação legal)
+    \item DPO designado, registos de processamento mantidos
+\end{itemize}
+
+% ============================================================
+\chapter{Infraestrutura}
+% ============================================================
+
+\section{Kubernetes}
+
+Cluster K3s com os seguintes namespaces:
+
+\begin{tabular}{lp{8cm}}
+    \toprule
+    \textbf{Namespace} & \textbf{Componentes} \\
+    \midrule
+    ecossistema-prod & SGC, SI, WN, GPJ (backends + frontends) \\
+    ecossistema-staging & Réplica para staging/UAT \\
+    ecossistema-infra & PostgreSQL, Redis, RabbitMQ, MinIO \\
+    keycloak & Keycloak + PostgreSQL \\
+    monitoring & Prometheus, Grafana, Loki, Promtail \\
+    ingress & Traefik, cert-manager \\
+    \bottomrule
+\end{tabular}
+
+\section{CI/CD Pipeline}
+
+\begin{enumerate}
+    \item Commit em branch feature $\rightarrow$ GitHub Actions executa testes
+    \item Merge em main $\rightarrow$ Build Docker image, push para registry
+    \item ArgoCD detecta nova imagem $\rightarrow$ Deploy automático em staging
+    \item Aprovação manual $\rightarrow$ Deploy em produção
+\end{enumerate}
+
+\section{Monitoring}
+
+\begin{itemize}
+    \item \textbf{Prometheus}: Métricas JVM, HTTP, PostgreSQL, Redis
+    \item \textbf{Grafana}: Dashboards por sistema (4 dashboards)
+    \item \textbf{Loki}: Agregação de logs centralizada
+    \item \textbf{Alertas}: Slack webhook para CPU >80\%, memória >85\%, erros 5xx >1\%
+\end{itemize}
+
+% ============================================================
+\chapter{Testes}
+% ============================================================
+
+\section{Estratégia de Testes}
+
+\begin{tabular}{llp{5cm}l}
+    \toprule
+    \textbf{Nível} & \textbf{Ferramenta} & \textbf{Cobertura} & \textbf{CI} \\
+    \midrule
+    Unit & JUnit 5 / Jasmine & Services, controllers & Cada push \\
+    Integration & Spring Boot Test & API endpoints & Cada push \\
+    E2E (Web) & Cypress 15 & 21 test files, 4 sistemas & Merge em main \\
+    E2E (Mobile) & Detox 20 & 6 test suites, 25+ cenários & Merge em main \\
+    Load & JMeter 5.6 & 100 users/sistema, p95 <3s & Semanal \\
+    Security & OWASP ZAP + Trivy & APIs, deps, IaC & Semanal \\
+    Performance & Lighthouse CI & 10 URLs, score >80\% & Semanal \\
+    UAT & Manual (55 cenários) & 320+ passos de teste & Pre-go-live \\
+    \bottomrule
+\end{tabular}
+
+% ============================================================
+\chapter{Plano de Projecto}
+% ============================================================
+
+\section{Sprints}
+
+\begin{longtable}{clp{5cm}rl}
+    \toprule
+    \textbf{Sprint} & \textbf{Fase} & \textbf{Título} & \textbf{Horas} & \textbf{Estado} \\
+    \midrule
+    \endhead
+    S0 & Infra & Infraestrutura \& Fundação & 40h & CONCLUIDA \\
+    S1 & GPJ & GPJ Sistema Completo & 48h & CONCLUIDA \\
+    S2-S5 & SGC-BE & SGC Backend (4 sprints) & 160h & CONCLUIDA \\
+    S6-S9 & SGC-FE & SGC Frontend (4 sprints) & 160h & CONCLUIDA \\
+    S10-S11 & SI & Site Institucional & 80h & CONCLUIDA \\
+    S12-S13 & WN & Web Notícias & 80h & CONCLUIDA \\
+    S14 & Integração & Integração \& DevOps & 50h & CONCLUIDA \\
+    S15-S16 & Mobile & Mobile App (2 sprints) & 80h & CONCLUIDA \\
+    S17 & Testes & Testes \& Segurança & 40h & CONCLUIDA \\
+    S18 & Testes & UAT \& Documentação & 40h & EM CURSO \\
+    S19 & Go-Live & Go-Live \& Formação & 40h & PENDENTE \\
+    \bottomrule
+\end{longtable}
+
+\section{Métricas do Projecto}
+
+\begin{tabular}{lr}
+    \toprule
+    Total de sprints & 20 \\
+    Total de tarefas & 72 \\
+    Horas planeadas & 858h \\
+    Horas consumidas & 808h \\
+    Progresso & 84.7\% \\
+    \bottomrule
+\end{tabular}
+
+% ============================================================
+\chapter{Glossário}
+% ============================================================
+
+\begin{longtable}{lp{10cm}}
+    \toprule
+    \textbf{Termo} & \textbf{Definição} \\
+    \midrule
+    \endhead
+    API & Application Programming Interface \\
+    CI/CD & Continuous Integration / Continuous Delivery \\
+    CORS & Cross-Origin Resource Sharing \\
+    CRUD & Create, Read, Update, Delete \\
+    FCM & Firebase Cloud Messaging \\
+    GDPR & General Data Protection Regulation \\
+    JWT & JSON Web Token \\
+    K3s & Lightweight Kubernetes distribution \\
+    OIDC & OpenID Connect \\
+    OTA & Over-The-Air (updates) \\
+    PKCE & Proof Key for Code Exchange \\
+    RBAC & Role-Based Access Control \\
+    REST & Representational State Transfer \\
+    SGC & Sistema de Gestão Consular \\
+    SI & Site Institucional \\
+    SPA & Single Page Application \\
+    SSO & Single Sign-On \\
+    SUS & System Usability Scale \\
+    UAT & User Acceptance Testing \\
+    WN & Web Notícias \\
+    \bottomrule
+\end{longtable}
+
+% ============================================================
+\end{document}

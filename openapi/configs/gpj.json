@@ -1,0 +1,30 @@
+{
+  "$schema": "https://openapi-generator.tech/docs/configuration",
+  "generatorName": "typescript-angular",
+  "inputSpec": "../specs/gpj-openapi.json",
+  "outputDir": "../generated/gpj-client",
+  "additionalProperties": {
+    "npmName": "@ecossistema/gpj-client",
+    "npmVersion": "1.0.0",
+    "ngVersion": "18.0.0",
+    "supportsES6": true,
+    "withInterfaces": true,
+    "providedIn": "root",
+    "serviceSuffix": "ApiService",
+    "modelSuffix": "",
+    "fileNaming": "camelCase",
+    "stringEnums": true,
+    "enumPropertyNaming": "UPPERCASE",
+    "taggedUnions": true
+  },
+  "typeMappings": {
+    "DateTime": "string",
+    "date": "string",
+    "UUID": "string"
+  },
+  "globalProperty": {
+    "apis": "",
+    "models": "",
+    "supportingFiles": "index.ts,configuration.ts,variables.ts,api.module.ts"
+  }
+}

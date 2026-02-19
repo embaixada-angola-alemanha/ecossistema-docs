@@ -1,0 +1,19 @@
+{
+  "name": "@ecossistema/e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-system E2E test suite for the Ecossistema Digital",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run --browser chrome",
+    "cy:run:sgc": "cypress run --spec 'cypress/e2e/sgc/**/*.cy.ts'",
+    "cy:run:si": "cypress run --spec 'cypress/e2e/si/**/*.cy.ts'",
+    "cy:run:wn": "cypress run --spec 'cypress/e2e/wn/**/*.cy.ts'",
+    "cy:run:gpj": "cypress run --spec 'cypress/e2e/gpj/**/*.cy.ts'",
+    "cy:run:cross": "cypress run --spec 'cypress/e2e/cross-system/**/*.cy.ts'"
+  },
+  "devDependencies": {
+    "cypress": "^15.10.0",
+    "typescript": "^5.7.0"
+  }
+}

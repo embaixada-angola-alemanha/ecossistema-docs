@@ -1,0 +1,149 @@
+---
+# OWASP ZAP Automation Framework configuration
+# Targets all 4 backend APIs + 4 frontend applications
+
+env:
+  contexts:
+    - name: "SGC Backend API"
+      urls:
+        - "http://localhost:8081/api/v1"
+      includePaths:
+        - "http://localhost:8081/api/v1/.*"
+      excludePaths:
+        - "http://localhost:8081/api/v1/actuator/.*"
+      authentication:
+        method: "json"
+        parameters:
+          loginPageUrl: "http://localhost:8080/realms/ecossistema/protocol/openid-connect/token"
+          loginRequestBody: '{"grant_type":"password","client_id":"sgc-app","username":"{%username%}","password":"{%password%}"}'
+        verification:
+          method: "response"
+          pollUrl: "http://localhost:8081/api/v1/cidadaos?page=0&size=1"
+          loggedInRegex: "\\Qsuccess\\E"
+      users:
+        - name: "admin"
+          credentials:
+            username: "admin@embaixada-angola.de"
+            password: "${ZAP_ADMIN_PASSWORD}"
+
+    - name: "SI Backend API"
+      urls:
+        - "http://localhost:8082/api/v1"
+      includePaths:
+        - "http://localhost:8082/api/v1/.*"
+
+    - name: "WN Backend API"
+      urls:
+        - "http://localhost:8083/api/v1"
+      includePaths:
+        - "http://localhost:8083/api/v1/.*"
+
+    - name: "GPJ Backend API"
+      urls:
+        - "http://localhost:8084/api/v1"
+      includePaths:
+        - "http://localhost:8084/api/v1/.*"
+
+    - name: "SGC Frontend"
+      urls:
+        - "http://localhost:3001"
+    - name: "SI Frontend"
+      urls:
+        - "http://localhost:3002"
+    - name: "WN Frontend"
+      urls:
+        - "http://localhost:3003"
+    - name: "GPJ Frontend"
+      urls:
+        - "http://localhost:4200"
+
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: spider
+    parameters:
+      maxDuration: 5
+      maxDepth: 5
+    contextName: "SGC Backend API"
+    user: "admin"
+
+  - type: spider
+    parameters:
+      maxDuration: 3
+      maxDepth: 3
+    contextName: "SI Backend API"
+
+  - type: spider
+    parameters:
+      maxDuration: 3
+      maxDepth: 3
+    contextName: "WN Backend API"
+
+  - type: spiderAjax
+    parameters:
+      maxDuration: 5
+    contextName: "SGC Frontend"
+
+  - type: spiderAjax
+    parameters:
+      maxDuration: 3
+    contextName: "SI Frontend"
+
+  - type: spiderAjax
+    parameters:
+      maxDuration: 3
+    contextName: "WN Frontend"
+
+  - type: passiveScan-config
+    parameters:
+      maxAlertsPerRule: 10
+      scanOnlyInScope: true
+
+  - type: activeScan
+    parameters:
+      maxRuleDurationInMins: 5
+      maxScanDurationInMins: 30
+    contextName: "SGC Backend API"
+    user: "admin"
+    policyDefinition:
+      rules:
+        - id: 40012  # Cross Site Scripting (Reflected)
+          strength: "HIGH"
+          threshold: "LOW"
+        - id: 40014  # Cross Site Scripting (Persistent)
+          strength: "HIGH"
+          threshold: "LOW"
+        - id: 40018  # SQL Injection
+          strength: "HIGH"
+          threshold: "LOW"
+        - id: 40032  # CRLF Injection
+          strength: "MEDIUM"
+          threshold: "LOW"
+        - id: 90021  # XPath Injection
+          strength: "MEDIUM"
+          threshold: "LOW"
+
+  - type: activeScan
+    parameters:
+      maxRuleDurationInMins: 3
+      maxScanDurationInMins: 15
+    contextName: "SI Backend API"
+
+  - type: activeScan
+    parameters:
+      maxRuleDurationInMins: 3
+      maxScanDurationInMins: 15
+    contextName: "WN Backend API"
+
+  - type: report
+    parameters:
+      template: "traditional-html-plus"
+      reportDir: "/zap/reports"
+      reportFile: "ecossistema-zap-report"
+    risks:
+      - high
+      - medium
+      - low
