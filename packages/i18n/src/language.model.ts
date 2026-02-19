@@ -10,7 +10,7 @@ export const LANGUAGES: Language[] = [
   { code: 'pt', label: 'Português', flag: '🇦🇴' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { code: 'cs', label: 'Crioulo', flag: '🇨🇻' }
+  { code: 'cs', label: 'Čeština', flag: '🇨🇿' }
 ];
 
 export interface I18nConfig {
