@@ -7,12 +7,12 @@
     "data_fim_prevista": "2026-10-26",
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
-    "horas_totais_planeadas": 874,
-    "horas_consumidas": 874,
+    "horas_totais_planeadas": 888,
+    "horas_consumidas": 888,
     "total_sprints": 20,
     "total_tarefas": 71,
-    "tarefas_concluidas": 68,
-    "progresso_pct": 95.8,
+    "tarefas_concluidas": 69,
+    "progresso_pct": 97.2,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -256,12 +256,12 @@
       "id": 19,
       "titulo": "Go-Live & Formação",
       "fase": "Go-Live",
-      "estado": "PENDENTE",
-      "data_inicio": "2026-10-13",
+      "estado": "EM_PROGRESSO",
+      "data_inicio": "2026-02-19",
       "data_fim": "2026-10-26",
-      "horas_planeadas": 40,
-      "horas_consumidas": 0,
-      "progresso_pct": 0
+      "horas_planeadas": 54,
+      "horas_consumidas": 14,
+      "progresso_pct": 33
     }
   ],
   "tarefas": [
@@ -2546,20 +2546,38 @@
     },
     {
       "id": "T19.1",
-      "nome": "Production Kubernetes Deploy",
+      "nome": "Production Docker Compose Deploy",
       "sprint": 19,
       "horas_planeadas": 14,
-      "horas_consumidas": 0,
+      "horas_consumidas": 14,
       "fase": "Go-Live",
       "repo": "ecossistema-infra",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "deploy/docker-compose.yml",
+        "deploy/docker-compose.monitoring.yml",
+        "deploy/.env.staging",
+        "deploy/.env.production",
+        "deploy/nginx/sites-available/embaixada-prod.conf",
+        "deploy/nginx/sites-available/embaixada-staging.conf",
+        "deploy/scripts/setup-vps.sh",
+        "deploy/scripts/deploy.sh",
+        "deploy/scripts/setup-tls.sh",
+        "deploy/scripts/backup.sh",
+        "deploy/monitoring/prometheus.yml",
+        "deploy/monitoring/promtail.yml",
+        "8x Dockerfile + .dockerignore (all backends+frontends)",
+        "4x nginx.conf (all frontends)",
+        "8x application-staging.yml + application-production.yml",
+        "4x environment.staging.ts + environment.prod.ts updated",
+        "4x angular.json staging build config"
+      ],
       "bloqueios": [],
-      "notas": "",
-      "descricao": "Deploy produção: Kubernetes manifests, Helm charts, SSL certificates, DNS config, monitoring (Prometheus+Grafana), log aggregation (Loki), backup automation.",
+      "notas": "Pivoted from K8s to Docker Compose for Strato VPS (6 vCPU, 24 GB, 360 GB). Domain: embaixada-angola.site. Staging (10xxx ports, stg-* subdomains) + Production (20xxx ports) on single VPS. K8s migration path preserved (same Dockerfiles). 49 files across 9 repos.",
+      "descricao": "Deploy infrastructure: Dockerfiles for 8 services, Docker Compose stacks (staging+production), Nginx reverse proxy with TLS (certbot), monitoring (Prometheus+Grafana+Loki), backup automation, deploy scripts. Domain: embaixada-angola.site.",
       "criterios": [
         "Kubernetes cluster configurado",
         "Helm charts para 4 backends",
@@ -2888,6 +2906,16 @@
       "data": "2026-02-19",
       "evento": "PUSH_REPOS",
       "detalhe": "2 repos pushed to GitHub (origin/develop): sgc-backend (test suite repair, commit 03ef107), sgc-frontend (citizen forms + Meu Perfil, commit 1a6cc8f)."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T19.1 Production Docker Compose Deploy concluída. Pivoted from K8s to Docker Compose for Strato VPS (6 vCPU, 24 GB, 360 GB). Domain: embaixada-angola.site. Created: 8 Dockerfiles (4 JRE Alpine backends + 4 Node→Nginx frontends), docker-compose.yml (parameterized for staging 10xxx + production 20xxx), Nginx reverse proxy (20 server blocks), TLS setup (certbot), monitoring (Prometheus+Grafana+Loki+Promtail), backup (daily pg_dump), deploy scripts (setup-vps.sh, deploy.sh). 8 Spring Boot staging/production profiles, 4 Angular staging environments + angular.json configs. 49 files across 9 repos."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "PUSH_ALL_REPOS",
+      "detalhe": "9 repos committed and pushed to GitHub (origin/develop): ecossistema-infra (a3bb840, 13 files), sgc-backend (32230e6), si-backend (687c294), wn-backend (1344710), gpj-backend (07a3335), sgc-frontend (875554d), si-frontend (15586b7), wn-frontend (5091754), gpj-frontend (d701017). All deployment infrastructure for embaixada-angola.site."
     }
   ]
 }
