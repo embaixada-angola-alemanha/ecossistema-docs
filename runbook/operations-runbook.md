@@ -1,231 +1,255 @@
 # Operations Runbook — Ecossistema Digital
 
-## Embaixada da República de Angola na Alemanha
+## Embaixada da Republica de Angola na Alemanha
+
+**Dominio:** embaixada-angola.site
+**Infraestrutura:** Strato VPS com Docker Compose
 
 ---
 
-## Quick Reference
+## Referencia Rapida
 
-| Service | Health Check | Restart Command |
-|---------|-------------|-----------------|
-| SGC Backend | `curl https://api-sgc.embaixada-angola.de/actuator/health` | `kubectl rollout restart deploy/sgc-backend -n ecossistema-prod` |
-| SI Backend | `curl https://api-si.embaixada-angola.de/actuator/health` | `kubectl rollout restart deploy/si-backend -n ecossistema-prod` |
-| WN Backend | `curl https://api-wn.embaixada-angola.de/actuator/health` | `kubectl rollout restart deploy/wn-backend -n ecossistema-prod` |
-| GPJ Backend | `curl https://api-gpj.embaixada-angola.de/actuator/health` | `kubectl rollout restart deploy/gpj-backend -n ecossistema-prod` |
-| PostgreSQL | `kubectl exec postgres-postgresql-0 -n ecossistema-infra -- pg_isready` | `kubectl rollout restart sts/postgres-postgresql -n ecossistema-infra` |
-| Redis | `kubectl exec redis-master-0 -n ecossistema-infra -- redis-cli ping` | `kubectl rollout restart sts/redis-master -n ecossistema-infra` |
-| Keycloak | `curl https://auth.embaixada-angola.de/health` | `kubectl rollout restart deploy/keycloak -n keycloak` |
+| Servico | Health Check | Comando de Restart |
+|---------|-------------|-------------------|
+| SGC Backend | `curl https://api-sgc.embaixada-angola.site/actuator/health` | `docker compose --env-file .env.production restart sgc-backend` |
+| SI Backend | `curl https://api-si.embaixada-angola.site/actuator/health` | `docker compose --env-file .env.production restart si-backend` |
+| WN Backend | `curl https://api-wn.embaixada-angola.site/actuator/health` | `docker compose --env-file .env.production restart wn-backend` |
+| GPJ Backend | `curl https://api-gpj.embaixada-angola.site/actuator/health` | `docker compose --env-file .env.production restart gpj-backend` |
+| PostgreSQL | `docker compose --env-file .env.production exec postgres pg_isready` | `docker compose --env-file .env.production restart postgres` |
+| Redis | `docker compose --env-file .env.production exec redis redis-cli ping` | `docker compose --env-file .env.production restart redis` |
+| Keycloak | `curl https://auth.embaixada-angola.site/health` | `docker compose --env-file .env.production restart keycloak` |
 
 ---
 
-## 1. Daily Operations
+## 1. Operacoes Diarias
 
-### 1.1 Morning Health Check (09:00)
+### 1.1 Health Check Matinal (09:00)
 
 ```bash
 #!/bin/bash
 # daily-health-check.sh
 
 echo "=== Ecossistema Health Check ==="
-echo "Date: $(date)"
+echo "Data: $(date)"
 echo ""
 
-# Check pods
-echo "--- Pod Status ---"
-kubectl get pods -n ecossistema-prod -o wide
+# Verificar estado dos containers
+echo "--- Estado dos Containers ---"
+docker compose --env-file .env.production ps
 echo ""
 
-# Check services health
+# Verificar saude dos servicos
+echo "--- Saude dos Servicos ---"
 for SVC in api-sgc api-si api-wn api-gpj; do
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://${SVC}.embaixada-angola.de/actuator/health")
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://${SVC}.embaixada-angola.site/actuator/health")
   echo "${SVC}: HTTP ${STATUS}"
 done
 echo ""
 
-# Check database
-echo "--- Database ---"
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- \
+# Verificar base de dados
+echo "--- Base de Dados ---"
+docker compose --env-file .env.production exec postgres \
   psql -U ecossistema -c "SELECT datname, numbackends FROM pg_stat_database WHERE datname LIKE '%_db';"
 echo ""
 
-# Check Redis
+# Verificar Redis
 echo "--- Redis ---"
-kubectl exec redis-master-0 -n ecossistema-infra -- redis-cli info memory | grep used_memory_human
+docker compose --env-file .env.production exec redis redis-cli info memory | grep used_memory_human
 echo ""
 
-# Check disk
-echo "--- Disk Usage ---"
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- df -h /bitnami/postgresql
+# Verificar disco
+echo "--- Uso de Disco ---"
+df -h /
 echo ""
 
-# Check certificates
-echo "--- TLS Certificates ---"
-kubectl get certificates -n ecossistema-prod -o custom-columns="NAME:.metadata.name,READY:.status.conditions[0].status,EXPIRY:.status.notAfter"
+# Verificar certificados TLS
+echo "--- Certificados TLS ---"
+for SUB in sgc si wn gpj api-sgc api-si api-wn api-gpj auth grafana; do
+  EXPIRY=$(echo | openssl s_client -servername "${SUB}.embaixada-angola.site" -connect "${SUB}.embaixada-angola.site:443" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+  echo "${SUB}.embaixada-angola.site: expira ${EXPIRY}"
+done
 ```
 
-### 1.2 Grafana Dashboards to Monitor
+### 1.2 Dashboards Grafana a Monitorizar
 
-| Dashboard | URL | Key Metrics |
-|-----------|-----|-------------|
-| System Overview | /d/overview | CPU, memory, pod status |
-| SGC Performance | /d/sgc | Request rate, latency p95, error rate |
-| Database | /d/postgres | Connections, query time, cache hit ratio |
-| Redis | /d/redis | Hit rate, memory, keys count |
+| Dashboard | URL | Metricas Principais |
+|-----------|-----|---------------------|
+| Visao Geral | `https://grafana.embaixada-angola.site/d/overview` | CPU, memoria, estado dos containers |
+| SGC Performance | `https://grafana.embaixada-angola.site/d/sgc` | Taxa de pedidos, latencia p95, taxa de erros |
+| Base de Dados | `https://grafana.embaixada-angola.site/d/postgres` | Conexoes, tempo de query, cache hit ratio |
+| Redis | `https://grafana.embaixada-angola.site/d/redis` | Hit rate, memoria, contagem de chaves |
 
 ---
 
-## 2. Common Issues & Resolution
+## 2. Problemas Comuns e Resolucao
 
-### 2.1 Backend Pod CrashLoopBackOff
+### 2.1 Container em Restart Continuo
 
-**Symptoms:** Pod restarts repeatedly, `kubectl get pods` shows CrashLoopBackOff
+**Sintomas:** Container reinicia repetidamente, `docker compose ps` mostra "Restarting"
 
-**Investigation:**
+**Investigacao:**
 ```bash
-# Check logs
-kubectl logs deploy/sgc-backend -n ecossistema-prod --previous
+# Verificar logs do container
+docker compose --env-file .env.production logs sgc-backend --tail=200
 
-# Check events
-kubectl describe pod <pod-name> -n ecossistema-prod
+# Verificar logs anteriores ao crash
+docker compose --env-file .env.production logs sgc-backend --tail=500 | head -100
 
-# Common causes:
-# - Database unreachable → check PostgreSQL
-# - Redis unreachable → check Redis
-# - Keycloak unreachable → check Keycloak
-# - Out of memory → check resource limits
+# Causas comuns:
+# - Base de dados inacessivel -> verificar PostgreSQL
+# - Redis inacessivel -> verificar Redis
+# - Keycloak inacessivel -> verificar Keycloak
+# - Memoria insuficiente -> verificar limites de recursos
 ```
 
-**Resolution:**
+**Resolucao:**
 ```bash
-# If database issue:
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- pg_isready
-# If not ready, restart PostgreSQL
+# Se problema na base de dados:
+docker compose --env-file .env.production exec postgres pg_isready
+# Se nao estiver pronto, reiniciar PostgreSQL:
+docker compose --env-file .env.production restart postgres
 
-# If memory issue, increase limits:
-kubectl set resources deploy/sgc-backend -n ecossistema-prod --limits=memory=2Gi
+# Se problema de memoria, ajustar limites no docker-compose.yml:
+# deploy:
+#   resources:
+#     limits:
+#       memory: 2G
 
-# If config issue, check env vars:
-kubectl describe deploy/sgc-backend -n ecossistema-prod | grep -A 5 "Environment"
+# Se problema de configuracao, verificar variaveis de ambiente:
+docker compose --env-file .env.production config | grep -A 10 sgc-backend
+
+# Reiniciar o servico afetado:
+docker compose --env-file .env.production restart sgc-backend
 ```
 
-### 2.2 High Response Times (>3s)
+### 2.2 Tempos de Resposta Elevados (>3s)
 
-**Symptoms:** Grafana alerts, slow page loads, user complaints
+**Sintomas:** Alertas no Grafana, paginas lentas, queixas dos utilizadores
 
-**Investigation:**
+**Investigacao:**
 ```bash
-# Check pod resource usage
-kubectl top pods -n ecossistema-prod
+# Verificar uso de recursos dos containers
+docker stats --no-stream
 
-# Check database slow queries
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- psql -U ecossistema -d sgc_db -c "
+# Verificar queries lentas na base de dados
+docker compose --env-file .env.production exec postgres psql -U ecossistema -d sgc_db -c "
 SELECT pid, now() - pg_stat_activity.query_start AS duration, query
 FROM pg_stat_activity
 WHERE state = 'active' AND now() - pg_stat_activity.query_start > interval '1 second'
 ORDER BY duration DESC;"
 
-# Check Redis cache hit rate
-kubectl exec redis-master-0 -n ecossistema-infra -- redis-cli info stats | grep hit
-
-# Check if replica count is sufficient
-kubectl get hpa -n ecossistema-prod
+# Verificar cache hit rate do Redis
+docker compose --env-file .env.production exec redis redis-cli info stats | grep hit
 ```
 
-**Resolution:**
+**Resolucao:**
 ```bash
-# Scale up if under heavy load
-kubectl scale deploy/sgc-backend -n ecossistema-prod --replicas=3
+# Escalar manualmente se sob carga elevada
+docker compose --env-file .env.production up -d --scale sgc-backend=3
 
-# Clear Redis cache if stale
-kubectl exec redis-master-0 -n ecossistema-infra -- redis-cli FLUSHDB
+# Limpar cache Redis se dados obsoletos
+docker compose --env-file .env.production exec redis redis-cli FLUSHDB
 
-# Run VACUUM on database
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- psql -U ecossistema -d sgc_db -c "VACUUM ANALYZE;"
+# Executar VACUUM na base de dados
+docker compose --env-file .env.production exec postgres psql -U ecossistema -d sgc_db -c "VACUUM ANALYZE;"
 ```
 
-### 2.3 Keycloak Login Failures
+**Nota:** Docker Compose nao suporta auto-scaling (HPA). O ajuste de replicas e manual. Monitorizar via Grafana e ajustar conforme necessario.
 
-**Symptoms:** Users cannot log in, 401/403 errors from APIs
+### 2.3 Falhas de Login no Keycloak
 
-**Investigation:**
+**Sintomas:** Utilizadores nao conseguem iniciar sessao, erros 401/403 das APIs
+
+**Investigacao:**
 ```bash
-# Check Keycloak health
-curl -s https://auth.embaixada-angola.de/health | jq .
+# Verificar saude do Keycloak
+curl -s https://auth.embaixada-angola.site/health | jq .
 
-# Check Keycloak logs
-kubectl logs deploy/keycloak -n keycloak --tail=100
+# Verificar logs do Keycloak
+docker compose --env-file .env.production logs keycloak --tail=100
 
-# Check realm configuration
-# Login to Keycloak admin: https://auth.embaixada-angola.de/admin
-# Verify: Realm settings → Tokens → Access token lifespan
+# Verificar configuracao do realm
+# Aceder a: https://auth.embaixada-angola.site/admin
+# Verificar: Realm settings -> Tokens -> Access token lifespan
 ```
 
-**Resolution:**
+**Resolucao:**
 ```bash
-# If Keycloak DB connection lost
-kubectl rollout restart deploy/keycloak -n keycloak
+# Se conexao a base de dados do Keycloak perdida
+docker compose --env-file .env.production restart keycloak
 
-# If token signing key rotated unexpectedly
-# All backends need restart to fetch new JWKS
-kubectl rollout restart deploy/sgc-backend deploy/si-backend deploy/wn-backend deploy/gpj-backend -n ecossistema-prod
+# Se chave de assinatura de tokens foi rotacionada inesperadamente
+# Todos os backends precisam reiniciar para obter o novo JWKS
+docker compose --env-file .env.production restart sgc-backend si-backend wn-backend gpj-backend
 ```
 
-### 2.4 Disk Full
+### 2.4 Disco Cheio
 
-**Symptoms:** Write failures, database errors, pod evictions
+**Sintomas:** Falhas de escrita, erros na base de dados, containers parados
 
-**Investigation:**
+**Investigacao:**
 ```bash
-# Check PVC usage
-kubectl get pvc -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name,SIZE:.spec.resources.requests.storage"
+# Verificar uso de disco do VPS
+df -h
 
-# Check actual disk usage
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- df -h
-kubectl exec minio-0 -n ecossistema-infra -- df -h
+# Verificar espaco usado por Docker
+docker system df
+
+# Verificar tamanho dos volumes
+docker volume ls -q | xargs -I {} docker volume inspect {} --format '{{.Name}}: {{.Mountpoint}}' | while read vol; do
+  echo "$vol $(du -sh $(echo $vol | cut -d' ' -f2) 2>/dev/null | cut -f1)"
+done
 ```
 
-**Resolution:**
+**Resolucao:**
 ```bash
-# Clean old WAL files (PostgreSQL)
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- psql -U postgres -c "SELECT pg_switch_wal();"
+# Limpar imagens Docker antigas e nao utilizadas
+docker image prune -a --force
 
-# Clean old Docker images
-sudo docker image prune -a --force
+# Limpar containers parados e volumes orfaos
+docker system prune --volumes --force
 
-# Expand PVC (if storage class supports it)
-kubectl edit pvc postgres-postgresql -n ecossistema-infra
-# Change: storage: 50Gi → storage: 100Gi
+# Limpar logs antigos dos containers
+truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(docker compose --env-file .env.production ps -q sgc-backend))
+
+# Se necessario mais espaco, expandir o disco no painel Strato
 ```
 
-### 2.5 TLS Certificate Expired
+### 2.5 Certificado TLS Expirado
 
-**Symptoms:** Browser shows certificate error, HTTPS fails
+**Sintomas:** Browser apresenta erro de certificado, HTTPS falha
 
-**Investigation:**
+**Investigacao:**
 ```bash
-# Check certificate status
-kubectl get certificates -n ecossistema-prod
-kubectl describe certificate ecossistema-tls -n ecossistema-prod
+# Verificar validade do certificado
+echo | openssl s_client -servername sgc.embaixada-angola.site -connect sgc.embaixada-angola.site:443 2>/dev/null | openssl x509 -noout -dates
 
-# Check cert-manager logs
-kubectl logs deploy/cert-manager -n cert-manager --tail=50
+# Verificar estado do Certbot
+sudo certbot certificates
 ```
 
-**Resolution:**
+**Resolucao:**
 ```bash
-# Force certificate renewal
-kubectl delete certificate ecossistema-tls -n ecossistema-prod
-# cert-manager will automatically recreate it
+# Renovar todos os certificados
+sudo certbot renew
 
-# If cert-manager is broken
-kubectl rollout restart deploy/cert-manager -n cert-manager
+# Renovar certificado especifico
+sudo certbot certonly --nginx -d sgc.embaixada-angola.site
+
+# Verificar que a renovacao automatica esta configurada
+sudo systemctl status certbot.timer
+
+# Apos renovacao, recarregar o Nginx
+docker compose --env-file .env.production restart nginx
+# Ou se Nginx estiver fora do Docker:
+sudo systemctl reload nginx
 ```
 
 ---
 
-## 3. Backup & Restore
+## 3. Backup e Restauro
 
-### 3.1 Database Backup (Daily at 02:00 UTC)
+### 3.1 Backup da Base de Dados (Diario as 02:00 UTC)
 
 ```bash
 #!/bin/bash
@@ -235,145 +259,180 @@ BACKUP_DIR="/backups/postgres/${DATE}"
 mkdir -p "${BACKUP_DIR}"
 
 for DB in sgc_db si_db wn_db gpj_db keycloak_db; do
-  echo "Backing up ${DB}..."
-  kubectl exec postgres-postgresql-0 -n ecossistema-infra -- \
+  echo "A fazer backup de ${DB}..."
+  docker compose --env-file .env.production exec -T postgres \
     pg_dump -U ecossistema -Fc "${DB}" > "${BACKUP_DIR}/${DB}.dump"
-  echo "  Size: $(du -sh ${BACKUP_DIR}/${DB}.dump | cut -f1)"
+  echo "  Tamanho: $(du -sh ${BACKUP_DIR}/${DB}.dump | cut -f1)"
 done
 
-# Retain last 30 days
+# Reter ultimos 30 dias
 find /backups/postgres -maxdepth 1 -mtime +30 -type d -exec rm -rf {} \;
-echo "Backup complete: ${BACKUP_DIR}"
+echo "Backup completo: ${BACKUP_DIR}"
 ```
 
-### 3.2 Database Restore
+### 3.2 Restauro da Base de Dados
 
 ```bash
-# Restore specific database
+# Restaurar base de dados especifica
 DB_NAME="sgc_db"
 BACKUP_FILE="/backups/postgres/20260218_020000/sgc_db.dump"
 
-# Drop and recreate
-kubectl exec postgres-postgresql-0 -n ecossistema-infra -- psql -U postgres -c "
+# Terminar conexoes ativas, eliminar e recriar
+docker compose --env-file .env.production exec postgres psql -U postgres -c "
   SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DB_NAME}';
   DROP DATABASE IF EXISTS ${DB_NAME};
   CREATE DATABASE ${DB_NAME} OWNER ecossistema;"
 
-# Restore
-kubectl exec -i postgres-postgresql-0 -n ecossistema-infra -- \
+# Restaurar
+docker compose --env-file .env.production exec -T postgres \
   pg_restore -U ecossistema -d "${DB_NAME}" < "${BACKUP_FILE}"
 
-# Restart affected backend
-kubectl rollout restart deploy/sgc-backend -n ecossistema-prod
+# Reiniciar o backend afetado
+docker compose --env-file .env.production restart sgc-backend
 ```
 
-### 3.3 MinIO Backup
+### 3.3 Backup do MinIO
 
 ```bash
 #!/bin/bash
 # backup-minio.sh
 DATE=$(date +%Y%m%d_%H%M%S)
 
-# Use mc (MinIO Client) to sync
-mc alias set ecossistema https://minio.ecossistema-infra.svc:9000 ecossistema "${MINIO_PASSWORD}"
+# Usar mc (MinIO Client) para sincronizar
+mc alias set ecossistema http://localhost:9000 ecossistema "${MINIO_PASSWORD}"
 mc mirror ecossistema/ "/backups/minio/${DATE}/"
 
-# Retain last 14 days
+# Reter ultimos 14 dias
 find /backups/minio -maxdepth 1 -mtime +14 -type d -exec rm -rf {} \;
 ```
 
 ---
 
-## 4. User Management (Keycloak)
+## 4. Gestao de Utilizadores (Keycloak)
 
-### 4.1 Create New User
+### 4.1 Criar Novo Utilizador
 
-1. Login to https://auth.embaixada-angola.de/admin
-2. Select realm `ecossistema`
-3. Navigate to Users → Add user
-4. Fill: username, email, first name, last name
-5. Set temporary password (Credentials tab)
-6. Assign roles (Role Mappings tab):
-   - Consular officer: `sgc-officer`
-   - Administrator: `sgc-admin`, `gpj-admin`
-   - Viewer: `sgc-viewer`, `gpj-viewer`
-7. Verify user can log in
+1. Aceder a `https://auth.embaixada-angola.site/admin`
+2. Selecionar o realm `ecossistema`
+3. Navegar para Users -> Add user
+4. Preencher: username, email, primeiro nome, apelido
+5. Definir palavra-passe temporaria (separador Credentials)
+6. Atribuir papeis (separador Role Mappings):
+   - Oficial consular: `sgc-officer`
+   - Administrador: `sgc-admin`, `gpj-admin`
+   - Visualizador: `sgc-viewer`, `gpj-viewer`
+7. Verificar que o utilizador consegue iniciar sessao
 
-### 4.2 Reset User Password
+### 4.2 Redefinir Palavra-passe
 
-1. Keycloak Admin → Users → search user
-2. Credentials tab → Set password
-3. Toggle "Temporary" to ON (forces change on next login)
+1. Keycloak Admin -> Users -> procurar utilizador
+2. Separador Credentials -> Set password
+3. Ativar "Temporary" (forca alteracao no proximo login)
 
-### 4.3 Disable User
+### 4.3 Desativar Utilizador
 
-1. Keycloak Admin → Users → search user
-2. Toggle "Enabled" to OFF
-3. Active sessions are immediately invalidated
+1. Keycloak Admin -> Users -> procurar utilizador
+2. Desativar "Enabled"
+3. Sessoes ativas sao imediatamente invalidadas
 
 ---
 
-## 5. Scaling
+## 5. Escalamento
 
-### 5.1 Horizontal Scaling
+### 5.1 Escalamento Manual de Replicas
 
 ```bash
-# Scale backend replicas
-kubectl scale deploy/sgc-backend -n ecossistema-prod --replicas=3
+# Escalar replicas de um backend
+docker compose --env-file .env.production up -d --scale sgc-backend=3
 
-# Set up HPA (auto-scaling)
-kubectl autoscale deploy/sgc-backend -n ecossistema-prod \
-  --min=2 --max=5 --cpu-percent=70
+# Verificar replicas em execucao
+docker compose --env-file .env.production ps sgc-backend
+
+# Voltar a uma unica replica
+docker compose --env-file .env.production up -d --scale sgc-backend=1
 ```
 
-### 5.2 Database Connection Pool
+**Nota:** Docker Compose nao suporta Horizontal Pod Autoscaler (HPA) como Kubernetes. O ajuste de replicas e manual. Monitorizar metricas no Grafana e ajustar conforme a carga.
 
-Each backend Spring Boot application has a HikariCP connection pool:
+### 5.2 Pool de Conexoes a Base de Dados
 
-| Setting | Default | Max |
-|---------|---------|-----|
+Cada aplicacao Spring Boot utiliza HikariCP como pool de conexoes:
+
+| Configuracao | Valor Padrao | Maximo |
+|-------------|-------------|--------|
 | maximumPoolSize | 10 | 20 |
 | minimumIdle | 5 | 10 |
 | connectionTimeout | 30s | 60s |
 
-Adjust via environment variable:
+Ajustar via variavel de ambiente no `.env.production`:
 ```
 SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=20
 ```
 
----
-
-## 6. Maintenance Windows
-
-### Planned Maintenance
-- **When:** Sundays 02:00-06:00 UTC (low traffic)
-- **Notify:** 48h before via email to embassy staff
-- **Process:**
-  1. Post maintenance banner on all frontends
-  2. Perform updates
-  3. Verify health checks
-  4. Remove maintenance banner
-
-### Emergency Maintenance
-- **Authorization:** IT Lead or Consul
-- **Process:**
-  1. Assess severity and impact
-  2. Notify affected users
-  3. Fix issue
-  4. Post-mortem within 24h
+Apos alterar, reiniciar o backend:
+```bash
+docker compose --env-file .env.production restart sgc-backend
+```
 
 ---
 
-## 7. Contact & Escalation
+## 6. Janelas de Manutencao
 
-| Level | Contact | Response Time |
-|-------|---------|--------------|
-| L1 — IT Lead | it@embaixada-angola.de | 30 min (business hours) |
-| L2 — Dev Team | dev@embaixada-angola.de | 2 hours |
-| L3 — Infrastructure | infra@embaixada-angola.de | 4 hours |
+### Manutencao Planeada
+- **Quando:** Domingos 02:00-06:00 UTC (baixo trafego)
+- **Notificacao:** 48h antes via email ao pessoal da embaixada
+- **Processo:**
+  1. Publicar banner de manutencao em todos os frontends
+  2. Realizar atualizacoes
+  3. Verificar health checks
+  4. Remover banner de manutencao
 
-### Escalation Path
-1. IT Lead assesses the issue
-2. If cannot resolve in 1h → escalate to Dev Team
-3. If infrastructure issue → escalate to Infra
-4. If data loss or security → notify Consul immediately
+### Manutencao de Emergencia
+- **Autorizacao:** IT Lead ou Consul
+- **Processo:**
+  1. Avaliar gravidade e impacto
+  2. Notificar utilizadores afetados
+  3. Resolver o problema
+  4. Post-mortem em 24 horas
+
+---
+
+## 7. Contacto e Escalacao
+
+| Nivel | Contacto | Tempo de Resposta |
+|-------|----------|-------------------|
+| L1 — IT Lead | Grupo WhatsApp "Ecossistema Suporte" | 30 min (horario de funcionamento) |
+| L2 — Equipa Dev | support@embaixada-angola.site | 2 horas |
+| L3 — Infraestrutura | support@embaixada-angola.site (prioridade alta) | 4 horas |
+
+### Caminho de Escalacao
+
+1. IT Lead avalia o problema
+2. Se nao resolver em 1h -> escalar para Equipa Dev
+3. Se problema de infraestrutura -> escalar para Infra
+4. Se perda de dados ou seguranca -> notificar Consul imediatamente
+
+### Comandos Uteis para Diagnostico Rapido
+
+```bash
+# Ver todos os containers e o seu estado
+docker compose --env-file .env.production ps
+
+# Ver logs de um servico em tempo real
+docker compose --env-file .env.production logs -f sgc-backend --tail=100
+
+# Aceder a base de dados diretamente
+docker compose --env-file .env.production exec postgres psql -U ecossistema -d sgc_db
+
+# Aceder ao Redis
+docker compose --env-file .env.production exec redis redis-cli
+
+# Reiniciar todos os servicos
+docker compose --env-file .env.production restart
+
+# Parar todos os servicos
+docker compose --env-file .env.production down
+
+# Iniciar todos os servicos
+docker compose --env-file .env.production up -d
+```
