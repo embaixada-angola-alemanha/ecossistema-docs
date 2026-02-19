@@ -7,12 +7,12 @@
     "data_fim_prevista": "2026-10-26",
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
-    "horas_totais_planeadas": 858,
-    "horas_consumidas": 858,
+    "horas_totais_planeadas": 868,
+    "horas_consumidas": 868,
     "total_sprints": 20,
-    "total_tarefas": 67,
-    "tarefas_concluidas": 64,
-    "progresso_pct": 95.5,
+    "total_tarefas": 69,
+    "tarefas_concluidas": 66,
+    "progresso_pct": 95.7,
     "estado": "EM_PROGRESSO",
     "repositorios": [
       "ecossistema-infra",
@@ -148,9 +148,9 @@
       "fase": "SGC-FE",
       "estado": "CONCLUIDA",
       "data_inicio": "2026-02-18",
-      "data_fim": "2026-02-18",
-      "horas_planeadas": 40,
-      "horas_consumidas": 40,
+      "data_fim": "2026-02-19",
+      "horas_planeadas": 50,
+      "horas_consumidas": 50,
       "progresso_pct": 100
     },
     {
@@ -1290,14 +1290,14 @@
         "assets/i18n/pt.json (complete — 280+ keys)",
         "assets/i18n/en.json (complete — 280+ keys)",
         "assets/i18n/de.json (complete — 280+ keys)",
-        "assets/i18n/cs.json (complete — 280+ keys, Kriol)",
+        "assets/i18n/cs.json (complete — 490+ keys, Czech)",
         "app.ts (updated — lang persistence)",
         "app.html (updated — lang switcher with flags)",
         "app.scss (updated — lang styles)",
         "app.config.ts (updated — locale registration)"
       ],
       "bloqueios": [],
-      "notas": "4 complete translation files covering all 15 modules. Language preference persisted in localStorage. Locale data registered for pt/de/en. Flag indicators in switcher.",
+      "notas": "4 complete translation files covering all 15 modules. Language preference persisted in localStorage. Locale data registered for pt/de/en/cs. Flag indicators in switcher. Czech (cs) locale corrected from Kriol across all 3 frontends (SGC, SI, GPJ) and shared i18n package.",
       "descricao": "Internacionalização completa: 4 idiomas (Português, Alemão, Inglês, Checo), language switcher, locale-aware date/number formatting, RTL-ready.",
       "criterios": [
         "4 ficheiros de tradução completos",
@@ -1411,6 +1411,76 @@
         "Workflow end-to-end",
         "Notification delivery test",
         "Cobertura global >80%"
+      ]
+    },
+    {
+      "id": "T9.5",
+      "nome": "Citizen-Scoped Access Control",
+      "sprint": 9,
+      "horas_planeadas": 8,
+      "horas_consumidas": 8,
+      "fase": "SGC-FE",
+      "repo": "ecossistema-sgc-backend + ecossistema-sgc-frontend + ecossistema-commons",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "V9__add_keycloak_id_to_cidadaos.sql",
+        "entity/Cidadao.java (keycloakId field)",
+        "repository/CidadaoRepository.java (findByKeycloakId)",
+        "service/CitizenContextService.java (isCitizenOnly, getCurrentCidadao, canAccessCidadaoData, getCurrentCidadaoId)",
+        "controller/*Controller.java (8 controllers scoped for citizen access)",
+        "service/RelatorioService.java (getCitizenDashboard)",
+        "commons/SecurityUtils.java (getCurrentUserSubject)",
+        "frontend/core/services/auth.service.ts (isCitizenOnly, isStaff)",
+        "frontend/core/services/citizen-context.service.ts (new)",
+        "frontend/app.ts (citizen nav items, sidebar scoping)",
+        "frontend/features/dashboard/dashboard-home.ts (citizen vs staff KPIs)",
+        "frontend/features/*/list.ts (5 list components auto-scoped)",
+        "docs/ACCESS_MATRIX.md (6-role x 12-module permissions)"
+      ],
+      "bloqueios": [],
+      "notas": "Full RBAC implementation: 6 roles (ADMIN, CONSUL, OFFICER, CITIZEN, EDITOR, VIEWER). Citizens only see own data via keycloakId→cidadao lookup. Staff sees everything. Flyway V9 migration adds keycloak_id to cidadaos table. GET /me endpoint for citizen self-service. Empty results returned for unlinked citizens instead of 404.",
+      "descricao": "Controlo de acesso por role: cidadãos vêem apenas dados próprios, staff vê tudo. keycloakId linking, sidebar scoping, dashboard condicional.",
+      "criterios": [
+        "Cidadão vê apenas dados próprios",
+        "Staff vê todos os dados",
+        "GET /me endpoint funcional",
+        "Sidebar adaptada por role",
+        "Dashboard condicional (pessoal vs global)",
+        "Cidadão sem perfil associado recebe resultados vazios"
+      ]
+    },
+    {
+      "id": "T9.6",
+      "nome": "Czech Locale Fix (all frontends)",
+      "sprint": 9,
+      "horas_planeadas": 2,
+      "horas_consumidas": 2,
+      "fase": "SGC-FE",
+      "repo": "ecossistema-sgc-frontend + ecossistema-si-frontend + ecossistema-gpj-frontend + ecossistema-docs",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "ecossistema-sgc-frontend/src/assets/i18n/cs.json (full rewrite ~490 keys)",
+        "ecossistema-sgc-frontend/src/app/app.html (Kriol→Čeština)",
+        "ecossistema-sgc-frontend/src/app/app.config.ts (locale cs registration)",
+        "ecossistema-si-frontend/src/assets/i18n/cs.json (full rewrite)",
+        "ecossistema-si-frontend/src/app/core/services/language.service.ts (Čeština/🇨🇿)",
+        "ecossistema-gpj-frontend/src/assets/i18n/cs.json (full rewrite)",
+        "ecossistema-gpj-frontend/src/app/app.html (Kriol→Čeština)",
+        "ecossistema-docs/packages/i18n/src/language.model.ts (Čeština/🇨🇿)"
+      ],
+      "bloqueios": [],
+      "notas": "The 4th language (cs) was incorrectly set to Kriol (Cape Verdean Creole). Corrected to Czech (Čeština) across all 3 frontends and shared i18n package. Full translation files rewritten.",
+      "descricao": "Correcção do 4º idioma de Kriol para Checo em todos os frontends e pacote i18n partilhado.",
+      "criterios": [
+        "cs.json corrigido para Checo em SGC, SI, GPJ",
+        "Label e flag corrigidos (Čeština/🇨🇿)",
+        "Locale registration corrigida"
       ]
     },
     {
@@ -2725,6 +2795,21 @@
       "data": "2026-02-19",
       "evento": "PUSH_ALL_REPOS",
       "detalhe": "All 12 repositories committed and pushed to GitHub (origin/main). 571 files total. Repos: commons (8), gpj-backend (4), gpj-frontend (4), sgc-backend (10), sgc-frontend (95), si-backend (74), si-frontend (62), wn-backend (72), wn-frontend (57), docs (119), infra (1), mobile (65)."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T9.5 Citizen-Scoped Access Control concluída. Full RBAC: 6 roles, keycloakId→cidadao linking, all 8 controllers scoped, citizen dashboard, sidebar scoping, empty results for unlinked citizens. Backend: V9 migration, CitizenContextService, SecurityUtils.getCurrentUserSubject(). Frontend: CitizenContextService, AuthService extensions, conditional dashboard, auto-scoped list components. Repos: sgc-backend, sgc-frontend, commons, docs."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T9.6 Czech Locale Fix concluída. Corrected 4th language from Kriol (Cape Verdean Creole) to Czech (Čeština) across all 3 frontends (SGC, SI, GPJ) and shared i18n package. Full cs.json translations rewritten (~490 keys SGC, ~60 keys SI, ~50 keys GPJ)."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "PUSH_ALL_REPOS",
+      "detalhe": "6 repos pushed to GitHub (origin/develop): sgc-backend (citizen-scoped access + 404 fix), sgc-frontend (citizen UI + Czech), si-frontend (Czech), gpj-frontend (Czech), docs (ACCESS_MATRIX.md + Czech), commons (getCurrentUserSubject)."
     }
   ]
 }
