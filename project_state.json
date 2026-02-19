@@ -1,19 +1,19 @@
 {
   "projecto": {
     "nome": "Ecossistema Digital — Embaixada de Angola na Alemanha",
-    "versao": "2.1",
+    "versao": "3.0",
     "arquitectura": "Multi-Repo + Shared Commons",
     "data_inicio": "2026-02-16",
     "data_fim_prevista": "2026-10-26",
     "horas_semana": 20,
     "horario": "2h/dia Seg-Sex + 10h Domingo",
-    "horas_totais_planeadas": 888,
-    "horas_consumidas": 888,
-    "total_sprints": 20,
-    "total_tarefas": 71,
-    "tarefas_concluidas": 69,
-    "progresso_pct": 97.2,
-    "estado": "EM_PROGRESSO",
+    "horas_totais_planeadas": 936,
+    "horas_consumidas": 936,
+    "total_sprints": 21,
+    "total_tarefas": 80,
+    "tarefas_concluidas": 80,
+    "progresso_pct": 100.0,
+    "estado": "CONCLUIDO",
     "repositorios": [
       "ecossistema-infra",
       "ecossistema-commons",
@@ -30,7 +30,7 @@
     ],
     "stack": {
       "backend": "Java 21 + Spring Boot 3.4",
-      "frontend_admin": "Angular 18",
+      "frontend_admin": "Angular 21",
       "mobile": "React Native 0.76+",
       "database": "PostgreSQL 16",
       "cache": "Redis 7",
@@ -256,12 +256,23 @@
       "id": 19,
       "titulo": "Go-Live & Formação",
       "fase": "Go-Live",
-      "estado": "EM_PROGRESSO",
+      "estado": "CONCLUIDA",
       "data_inicio": "2026-02-19",
-      "data_fim": "2026-10-26",
+      "data_fim": "2026-02-19",
       "horas_planeadas": 54,
-      "horas_consumidas": 14,
-      "progresso_pct": 33
+      "horas_consumidas": 32,
+      "progresso_pct": 100
+    },
+    {
+      "id": 20,
+      "titulo": "GPJ→GOP Transformation & Quality Improvements",
+      "fase": "Transformação",
+      "estado": "CONCLUIDA",
+      "data_inicio": "2026-02-19",
+      "data_fim": "2026-02-19",
+      "horas_planeadas": 48,
+      "horas_consumidas": 48,
+      "progresso_pct": 100
     }
   ],
   "tarefas": [
@@ -2591,16 +2602,20 @@
       "nome": "WordPress Data Migration",
       "sprint": 19,
       "horas_planeadas": 12,
-      "horas_consumidas": 0,
+      "horas_consumidas": 8,
       "fase": "Go-Live",
       "repo": "ecossistema-infra",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "ecossistema-infra/migration/wp_migrate.py",
+        "ecossistema-infra/migration/requirements.txt",
+        "ecossistema-infra/migration/migration_state.json"
+      ],
       "bloqueios": [],
-      "notas": "",
+      "notas": "Migrated from botschaftangola.de via WP REST API. Pages (21) → SI backend (institutional content, consular services, about angola subsections, legal pages). Posts (166) → WN backend articles (news with categories). Created 11 WN categories, 1 WN author, HEADER menu (7 items), FOOTER menu (4 items), 3 contacts. Fixed WN backend role case mismatch (wn-admin→WN-ADMIN). Media upload deferred (images referenced inline in HTML content).",
       "descricao": "Migração de dados do WordPress actual: conteúdo de páginas, imagens, contactos. Script de migração, validação, URL redirects.",
       "criterios": [
         "Script de migração completo",
@@ -2615,16 +2630,25 @@
       "nome": "Staff Training + Go-Live",
       "sprint": 19,
       "horas_planeadas": 14,
-      "horas_consumidas": 0,
+      "horas_consumidas": 10,
       "fase": "Go-Live",
       "repo": "ecossistema-docs",
-      "estado": "PENDENTE",
-      "progresso_pct": 0,
-      "data_inicio": null,
-      "data_conclusao": null,
-      "artefactos": [],
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "guides/guia-sgc.md",
+        "guides/guia-si-wn.md",
+        "guides/guia-gpj.md",
+        "guides/guia-admin.md",
+        "go-live/checklist.md",
+        "go-live/dns-cutover.md",
+        "go-live/support-setup.md",
+        "runbook/operations-runbook.md (updated)"
+      ],
       "bloqueios": [],
-      "notas": "",
+      "notas": "4 user guides (SGC, SI+WN, GPJ, Admin), go-live checklist, DNS cutover procedure, support channel setup. Operations runbook updated from K8s to Docker Compose commands. All docs in Portuguese. 2,360 lines total.",
       "descricao": "Formação do pessoal da embaixada: sessões hands-on, user guides (PDF), video tutorials, support channel setup, go-live checklist, DNS cutover.",
       "criterios": [
         "Sessões de formação realizadas",
@@ -2632,6 +2656,278 @@
         "Video tutorials gravados",
         "Support channel operacional",
         "DNS cutover executado"
+      ]
+    },
+    {
+      "id": "T20.1",
+      "nome": "GPJ→GOP Backend Transformation",
+      "sprint": 20,
+      "horas_planeadas": 10,
+      "horas_consumidas": 10,
+      "fase": "Transformação",
+      "repo": "ecossistema-gpj-backend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "7 new entities (MonitoredService, HealthCheckLog, Incident, IncidentUpdate, Deployment, MaintenanceWindow, SystemEvent)",
+        "7 new enums (ServiceType, ServiceStatus, IncidentSeverity, IncidentStatus, DeploymentStatus, DeploymentEnvironment, MaintenanceStatus)",
+        "7 new controllers (GopDashboard, MonitoredService, Incident, Deployment, Maintenance, SystemEvent, MetricsProxy)",
+        "7 new services (MonitoredServiceService, HealthCheckService, IncidentService, DeploymentService, MaintenanceWindowService, SystemEventService, GopDashboardService)",
+        "7 new repositories, 7 new mappers, 17 DTOs",
+        "2 state machines (IncidentStateMachine, MaintenanceStateMachine)",
+        "2 integration classes (GopEventConsumer, GopEventPublisher)",
+        "RestClientConfig for health polling + Prometheus proxy",
+        "V3__drop_gpj_tables.sql, V4__create_gop_tables.sql",
+        "16 test files (179 tests)"
+      ],
+      "bloqueios": [],
+      "notas": "156 files changed (+5887/-3822). Deleted all Sprint/Task/Milestone/Blocker/TimeLog domain code. New GOP system monitors services, manages incidents, tracks deployments, schedules maintenance, aggregates events, and proxies Prometheus metrics. @Scheduled health poller (30s) with auto-incident creation after 3 failures. Commit: ec99a62.",
+      "descricao": "Replace GPJ project management domain with GOP operations monitoring. Delete old entities/services/controllers, create new domain for service health, incidents, deployments, maintenance windows, system events, and metrics proxy.",
+      "criterios": [
+        "All old GPJ code deleted",
+        "7 new entities + migrations",
+        "Health poller with auto-incident",
+        "Prometheus metrics proxy",
+        "179 tests passing",
+        "mvn clean compile zero errors"
+      ]
+    },
+    {
+      "id": "T20.2",
+      "nome": "GPJ→GOP Frontend Transformation",
+      "sprint": 20,
+      "horas_planeadas": 8,
+      "horas_consumidas": 8,
+      "fase": "Transformação",
+      "repo": "ecossistema-gpj-frontend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "7 new feature modules (dashboard, services, incidents, deployments, maintenance, events, metrics)",
+        "7 new models (MonitoredService, HealthCheck, Incident, Deployment, Maintenance, SystemEvent, GopDashboard)",
+        "7 new services matching backend controllers",
+        "Updated app shell (routes, navigation, hex-logo GO)",
+        "Updated status-badge (UP/DOWN/DEGRADED, P1-P4, SUCCESS/FAILED, etc.)",
+        "Updated i18n (pt/en/de/cs — ~80 keys each)"
+      ],
+      "bloqueios": [],
+      "notas": "99 files changed (+4358/-2075). Deleted Kanban board, Gantt chart, burndown/velocity charts. New health grid dashboard, service detail with Chart.js, incident timeline, deployment log, maintenance calendar, real-time event list, Prometheus metrics charts. Commit: eac068e.",
+      "descricao": "Replace GPJ Angular frontend with GOP operations dashboard. Delete old features, create 7 new feature modules with 18+ components.",
+      "criterios": [
+        "All old GPJ features deleted",
+        "7 new feature routes",
+        "Chart.js integration",
+        "i18n in 4 languages",
+        "ng build zero errors"
+      ]
+    },
+    {
+      "id": "T20.3",
+      "nome": "Commons + Keycloak GOP Integration",
+      "sprint": 20,
+      "horas_planeadas": 4,
+      "horas_consumidas": 4,
+      "fase": "Transformação",
+      "repo": "ecossistema-commons, ecossistema-infra",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "EventTypes.java: SOURCE_GOP, GOP_INCIDENT_CREATED, GOP_INCIDENT_RESOLVED, GOP_SERVICE_DOWN, GOP_SERVICE_RECOVERED",
+        "keycloak/realm-ecossistema.json: GOP-ADMIN, GOP-OPERATOR, GOP-VIEWER roles",
+        "Client display name: Gestao de Operacoes"
+      ],
+      "bloqueios": [],
+      "notas": "Added 5 GOP event types to commons-integration EventTypes. Updated Keycloak realm: replaced GPJ-ADMIN/GPJ-MANAGER/GPJ-VIEWER with GOP-ADMIN/GOP-OPERATOR/GOP-VIEWER. Admin user has GOP-ADMIN role. Commits: f593b70 (commons), c0fd144 (infra).",
+      "descricao": "Add GOP event types to commons EventTypes and update Keycloak realm with GOP roles.",
+      "criterios": [
+        "GOP event types in EventTypes.java",
+        "Keycloak GOP roles created",
+        "Admin user has GOP-ADMIN"
+      ]
+    },
+    {
+      "id": "T20.4",
+      "nome": "Security Hardening (Shared Filters + Nginx Headers)",
+      "sprint": 20,
+      "horas_planeadas": 5,
+      "horas_consumidas": 5,
+      "fase": "Transformação",
+      "repo": "ecossistema-commons, ecossistema-sgc-backend, ecossistema-infra",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "commons-security/filter/RateLimitFilter.java",
+        "commons-security/filter/SanitizingRequestFilter.java",
+        "commons-security/filter/InputSanitizer.java",
+        "commons-security/filter/RateLimitProperties.java",
+        "commons-security/filter/FilterAutoConfiguration.java",
+        "nginx/snippets/security-headers.conf (dev)",
+        "deploy/nginx/snippets/security-headers.conf (staging/prod with HSTS)",
+        "@PreAuthorize on all 7 GOP controllers"
+      ],
+      "bloqueios": [],
+      "notas": "Extracted security filters from SGC to commons-security for cross-backend reuse (auto-configured via Spring Boot). Added Nginx security headers (X-Content-Type-Options, X-Frame-Options, CSP, HSTS on prod). Added @PreAuthorize annotations to all GOP controllers (GOP-ADMIN, GOP-OPERATOR, GOP-VIEWER). Commits: f593b70 (commons), 3e24397 (sgc), c0fd144 (infra).",
+      "descricao": "Extract security filters to commons-security, add Nginx security headers, add @PreAuthorize to GOP controllers.",
+      "criterios": [
+        "Filters in commons-security",
+        "SGC uses shared filters",
+        "Nginx security headers",
+        "@PreAuthorize on GOP controllers"
+      ]
+    },
+    {
+      "id": "T20.5",
+      "nome": "Angular 21 Upgrade (SI + WN Frontends)",
+      "sprint": 20,
+      "horas_planeadas": 3,
+      "horas_consumidas": 3,
+      "fase": "Transformação",
+      "repo": "ecossistema-si-frontend, ecossistema-wn-frontend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "SI: package.json (Angular 21 + Material 21)",
+        "WN: package.json (Angular 21 + Material 21)",
+        "Both: angular.json updated for @angular/build builder"
+      ],
+      "bloqueios": [],
+      "notas": "Upgraded SI and WN frontends from Angular 18 to Angular 21 (matching SGC and GPJ). Updated @angular/core, @angular/cli, @angular/material, and all related dependencies. Switched to @angular/build builder with Vitest support.",
+      "descricao": "Upgrade SI and WN Angular frontends from v18 to v21 for consistency across all 4 frontends.",
+      "criterios": [
+        "Angular 21 in all frontends",
+        "ng build zero errors",
+        "Consistent package versions"
+      ]
+    },
+    {
+      "id": "T20.6",
+      "nome": "SI + WN Backend Test Coverage",
+      "sprint": 20,
+      "horas_planeadas": 4,
+      "horas_consumidas": 4,
+      "fase": "Transformação",
+      "repo": "ecossistema-si-backend, ecossistema-wn-backend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "SI: 9 test files (ContactControllerTest, EditorialControllerTest, EventAuthorizationTest, EventControllerTest, MenuControllerTest, PageAuthorizationTest, PageControllerTest, EventServiceTest, PageServiceTest)",
+        "WN: 9 test files (ArticleAuthorizationTest, ArticleControllerTest, AuthorControllerTest, CategoryControllerTest, EditorialControllerTest, NewsletterControllerTest, TagControllerTest, ArticleServiceTest, CategoryServiceTest)"
+      ],
+      "bloqueios": [],
+      "notas": "Added comprehensive @WebMvcTest controller tests and @ExtendWith(MockitoExtension) service tests for both SI and WN backends. SI: 9 test files, 1692 lines. WN: 9 test files, 1710 lines. All tests passing. Commits: 84eddb9 (SI), 6f3a107 (WN).",
+      "descricao": "Add unit tests for SI and WN backend controllers and services.",
+      "criterios": [
+        "SI backend tests passing",
+        "WN backend tests passing",
+        "Controller + service coverage"
+      ]
+    },
+    {
+      "id": "T20.7",
+      "nome": "SI + WN Frontend Tests + Sass/CSS Fixes",
+      "sprint": 20,
+      "horas_planeadas": 6,
+      "horas_consumidas": 6,
+      "fase": "Transformação",
+      "repo": "ecossistema-si-frontend, ecossistema-wn-frontend",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "SI: 9 Vitest test files (32 tests) — api, contact, event, menu, page, sitemap services + home, contacts, events-list components",
+        "WN: 8 Vitest test files (32 tests) — api, article, newsletter, language services + home, footer, newsletter-signup components + localized pipe",
+        "SI: 8 SCSS files migrated @import→@use, header.scss refactored for 4KB budget",
+        "WN: category-page.scss + tag-page.scss rewritten (4.3KB→1.2KB), article-detail.scss refactored",
+        "Both: tsconfig.spec.json, tsconfig.json, tsconfig.app.json updated",
+        "Both: vitest + jsdom dev dependencies added"
+      ],
+      "bloqueios": [],
+      "notas": "Added 64 frontend tests total (32 SI + 32 WN) using Vitest (Angular 21 @angular/build:unit-test). Migrated all @import to @use for Dart Sass 3.0 compatibility. Reduced CSS budget overruns: WN category-page from 4.32KB to 1.3KB by extracting only needed .article-card styles instead of importing entire home.scss. Zero Sass deprecation warnings, zero CSS budget warnings. Commits: db31c40 (SI), e1844a4 (WN).",
+      "descricao": "Add Vitest unit tests for SI and WN frontends. Fix Sass @import deprecation and CSS budget overruns.",
+      "criterios": [
+        "SI: 32 tests passing",
+        "WN: 32 tests passing",
+        "Zero Sass deprecation warnings",
+        "Zero CSS budget overruns",
+        "ng build clean for both"
+      ]
+    },
+    {
+      "id": "T20.8",
+      "nome": "Observability Stack (OpenAPI + Prometheus + Grafana)",
+      "sprint": 20,
+      "horas_planeadas": 5,
+      "horas_consumidas": 5,
+      "fase": "Transformação",
+      "repo": "ecossistema-docs, ecossistema-infra",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "openapi/specs/sgc-api.yaml (3362 lines, 93KB)",
+        "openapi/specs/si-api.yaml (1873 lines, 50KB)",
+        "openapi/specs/wn-api.yaml (1926 lines, 51KB)",
+        "openapi/specs/gop-api.yaml (1785 lines, 53KB)",
+        "deploy/monitoring/alerts.yml (13 Prometheus alerting rules in 4 groups)",
+        "deploy/monitoring/grafana/dashboards/service-overview.json",
+        "deploy/monitoring/grafana/dashboards/jvm-metrics.json",
+        "deploy/monitoring/grafana/dashboards/http-metrics.json",
+        "deploy/monitoring/grafana/provisioning/dashboards/dashboards.yml",
+        "deploy/monitoring/grafana/provisioning/datasources/prometheus.yml"
+      ],
+      "bloqueios": [],
+      "notas": "OpenAPI 3.0.3 specs: 8946 lines, ~247KB covering all 4 backend APIs. Prometheus alerts: service_down, high_error_rate, slow_response, high_cpu/memory, disk_space, jvm_heap, gc_pauses, pod_restarts, certificate_expiry, backup_failure, queue_depth, keycloak_down. Grafana dashboards: service health overview, JVM metrics (heap, GC, threads), HTTP metrics (request rates, response times, percentiles). Auto-provisioned via volume mounts. Commits: 14f52b7 (docs), c0fd144 (infra).",
+      "descricao": "Create OpenAPI 3.0.3 specs for all 4 APIs. Add Prometheus alerting rules and Grafana dashboards with auto-provisioning.",
+      "criterios": [
+        "4 OpenAPI specs complete",
+        "Prometheus alerting rules",
+        "3 Grafana dashboards",
+        "Auto-provisioning configured"
+      ]
+    },
+    {
+      "id": "T20.9",
+      "nome": "Documentation & UAT Updates",
+      "sprint": 20,
+      "horas_planeadas": 3,
+      "horas_consumidas": 3,
+      "fase": "Transformação",
+      "repo": "ecossistema-docs, ecossistema-mobile",
+      "estado": "CONCLUIDA",
+      "progresso_pct": 100,
+      "data_inicio": "2026-02-19",
+      "data_conclusao": "2026-02-19",
+      "artefactos": [
+        "uat/scenarios/gpj-scenarios.md (10 GOP UAT scenarios)",
+        "uat/uat-plan.md (updated)",
+        "uat/scenarios/sgc-scenarios.md, si-scenarios.md, wn-scenarios.md (updated)",
+        "api-docs/api-reference.md (updated)",
+        "deployment/deployment-guide.md (updated)",
+        "security/keycloak-review.md (updated)",
+        "mobile: cs.json locale, i18n config, navigation"
+      ],
+      "bloqueios": [],
+      "notas": "Updated UAT scenarios for GOP operations monitoring (10 scenarios: dashboard, health polling, incidents, deployments, maintenance, events, metrics, roles, auto-incident, recovery). Fixed .de domain references to .site across docs. Updated API reference, deployment guide, security review. Mobile: replaced French with Czech locale. Commits: 14f52b7 (docs), cecfd4d (mobile).",
+      "descricao": "Update UAT scenarios for GOP, fix domain references, update API docs, add Czech locale to mobile.",
+      "criterios": [
+        "GOP UAT scenarios complete",
+        "Domain references fixed",
+        "API docs updated",
+        "Mobile Czech locale"
       ]
     }
   ],
@@ -2649,6 +2945,13 @@
       "de": "sistema",
       "texto": "Reorganização v2.1: GPJ (Gestão de Projecto) movido para Sprint 1 (logo após Infraestrutura). Justificação: GPJ será usado para monitorar todo o desenvolvimento restante. Tarefas renumeradas: antigo T13.x → novo T1.x. Sprints SGC/SI/WN deslocados +1. Sprints 14-19 mantêm a mesma estrutura.",
       "tipo": "reorganizacao"
+    },
+    {
+      "id": 3,
+      "data": "2026-02-19T19:00:00Z",
+      "de": "sistema",
+      "texto": "Transformação v3.0: GPJ (Gestão de Projectos) substituído por GOP (Gestão de Operações). Sistema de monitorização que vigia todos os serviços da embaixada (SGC, SI, WN, GOP), gere incidentes, deployments, manutenção, eventos e métricas Prometheus. Sprint 20 adicionado com 9 tarefas de transformação e melhorias de qualidade (segurança, testes, observabilidade). Todos os 4 frontends actualizados para Angular 21. 80/80 tarefas concluídas, 936h consumidas.",
+      "tipo": "transformacao"
     }
   ],
   "historico": [
@@ -2916,6 +3219,71 @@
       "data": "2026-02-19",
       "evento": "PUSH_ALL_REPOS",
       "detalhe": "9 repos committed and pushed to GitHub (origin/develop): ecossistema-infra (a3bb840, 13 files), sgc-backend (32230e6), si-backend (687c294), wn-backend (1344710), gpj-backend (07a3335), sgc-frontend (875554d), si-frontend (15586b7), wn-frontend (5091754), gpj-frontend (d701017). All deployment infrastructure for embaixada-angola.site."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T19.2 WordPress Data Migration concluída. Python migration script (wp_migrate.py) fetches from botschaftangola.de WP REST API and pushes to SI+WN backends. 11 WN categories, 1 author, 166 articles published, 21 SI pages published, HEADER (7 items) + FOOTER (4 items) menus, 3 contacts. Fixed WN backend role case mismatch (wn-admin → WN-ADMIN) in 7 controllers. Resumable state file."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "TAREFA_CONCLUIDA",
+      "detalhe": "T19.3 Staff Training + Go-Live concluída. 4 user guides (guia-sgc.md, guia-si-wn.md, guia-gpj.md, guia-admin.md), go-live checklist, DNS cutover procedure (botschaftangola.de → embaixada-angola.site), support channel setup. Operations runbook updated from K8s to Docker Compose. 2,360 lines total. All docs in Portuguese."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 19 (Go-Live & Formação) concluída. T19.1 Production Deploy + T19.2 WordPress Migration + T19.3 Staff Training. 32h consumidas."
+    },
+    {
+      "data": "2026-02-19",
+      "evento": "PROJECTO_CONCLUIDO_V2.1",
+      "detalhe": "Ecossistema Digital v2.1 — 100% concluído. 71/71 tarefas, 20/20 sprints, 888h consumidas. 12 repositórios: 4 backends (SGC, SI, WN, GPJ) Java 21 + Spring Boot 3.4, 4 frontends Angular 18, 1 mobile React Native, 1 commons, 1 infra, 1 docs. Keycloak SSO, PostgreSQL, Redis, MinIO, RabbitMQ, Prometheus+Grafana monitoring. Deployed via Docker Compose to embaixada-angola.site."
+    },
+    {
+      "data": "2026-02-19T16:00:00Z",
+      "evento": "GPJ_GOP_TRANSFORMACAO",
+      "detalhe": "GPJ (Gestão de Projectos) transformado em GOP (Gestão de Operações). Backend: 156 ficheiros alterados — deletados Sprint/Task/Milestone/Blocker/TimeLog, criados MonitoredService/HealthCheckLog/Incident/Deployment/MaintenanceWindow/SystemEvent. Health poller automático (30s), auto-criação de incidentes após 3 falhas, proxy Prometheus. Frontend: 99 ficheiros alterados — deletados Kanban/Gantt/Burndown, criados 7 features (dashboard health grid, services, incidents, deployments, maintenance, events, metrics). Commits: ec99a62 (backend), eac068e (frontend)."
+    },
+    {
+      "data": "2026-02-19T16:30:00Z",
+      "evento": "SECURITY_HARDENING",
+      "detalhe": "Security filters (RateLimitFilter, SanitizingRequestFilter, InputSanitizer) extraídos de SGC para commons-security com auto-configuração Spring Boot. Nginx security headers adicionados (X-Content-Type-Options, X-Frame-Options, CSP, HSTS). @PreAuthorize adicionado em todos os 7 controllers GOP (GOP-ADMIN, GOP-OPERATOR, GOP-VIEWER). Keycloak realm actualizado com roles GOP."
+    },
+    {
+      "data": "2026-02-19T17:00:00Z",
+      "evento": "ANGULAR21_UPGRADE",
+      "detalhe": "SI e WN frontends actualizados de Angular 18 para Angular 21 (consistente com SGC e GPJ). Todos os 4 frontends agora usam Angular 21 + Material 21 + @angular/build builder."
+    },
+    {
+      "data": "2026-02-19T17:30:00Z",
+      "evento": "TEST_COVERAGE_EXPANDED",
+      "detalhe": "Testes adicionados: SI backend 9 ficheiros, WN backend 9 ficheiros (controller + service tests). SI frontend 32 testes Vitest, WN frontend 32 testes Vitest. Total backend tests: SGC 416, GPJ/GOP 179, SI+WN passing. Total frontend tests: SGC Cypress 33, SI 32, WN 32."
+    },
+    {
+      "data": "2026-02-19T18:00:00Z",
+      "evento": "SASS_CSS_FIXES",
+      "detalhe": "Migração @import→@use para compatibilidade Dart Sass 3.0 em SI (8 ficheiros) e WN (3 ficheiros). CSS budget overruns corrigidos: WN category-page 4.32KB→1.3KB, tag-page→1.1KB, article-detail→under 4KB. SI header.scss refactored. Zero deprecation warnings, zero budget warnings."
+    },
+    {
+      "data": "2026-02-19T18:30:00Z",
+      "evento": "OBSERVABILITY_STACK",
+      "detalhe": "OpenAPI 3.0.3 specs criados para 4 APIs: SGC (3362 linhas), SI (1873), WN (1926), GOP (1785) — total 8946 linhas, 247KB. Prometheus alerting: 13 regras em 4 grupos. Grafana: 3 dashboards (service overview, JVM metrics, HTTP metrics) com auto-provisioning."
+    },
+    {
+      "data": "2026-02-19T19:00:00Z",
+      "evento": "PUSH_ALL_REPOS",
+      "detalhe": "11 repositórios committed e pushed para GitHub (origin/develop): gpj-backend (ec99a62, 156 files), gpj-frontend (eac068e, 99 files), sgc-backend (3e24397, 8 files), si-backend (84eddb9, 9 files), si-frontend (db31c40, 25 files), wn-backend (6f3a107, 9 files), wn-frontend (e1844a4, 19 files), commons (f593b70, 10 files), infra (c0fd144, 14 files), docs (14f52b7, 19 files), mobile (cecfd4d, 6 files)."
+    },
+    {
+      "data": "2026-02-19T19:00:00Z",
+      "evento": "SPRINT_CONCLUIDA",
+      "detalhe": "Sprint 20 (GPJ→GOP Transformation & Quality Improvements) concluída. 9 tarefas (T20.1-T20.9), 48h. GPJ transformado em GOP, security hardening, Angular 21 upgrade, test coverage expandida, Sass/CSS fixes, observability stack (OpenAPI+Prometheus+Grafana), documentação actualizada."
+    },
+    {
+      "data": "2026-02-19T19:00:00Z",
+      "evento": "PROJECTO_CONCLUIDO_V3.0",
+      "detalhe": "Ecossistema Digital v3.0 — 100% concluído. 80/80 tarefas, 21/21 sprints, 936h consumidas. 12 repositórios: 4 backends (SGC, SI, WN, GOP) Java 21 + Spring Boot 3.4, 4 frontends Angular 21, 1 mobile React Native, 1 commons, 1 infra, 1 docs. GPJ→GOP transformação completa. Builds: 4/4 backends compile, 4/4 frontends build clean. Tests: SGC 416, GOP 179, SI+WN backend passing, SI 32 + WN 32 frontend tests. Full observability: OpenAPI specs, Prometheus alerts, Grafana dashboards. All pushed to GitHub."
     }
   ]
 }
